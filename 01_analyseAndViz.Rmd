@@ -239,7 +239,8 @@ q2map <- ggplot() +
 q2map <- q2map + 
   theme_map(base_family = baseFont) +
   theme(legend.position = 'top', 
-        legend.key = element_blank()
+        legend.key = element_blank(),
+        plot.margin = margin(0, 5, 0, 1, "pt"),
         ) +
   scale_fill_viridis_d(
     option = "E", guide = guide_legend(
@@ -252,7 +253,7 @@ q2map <- q2map +
 imap <- ggiraph(
   code = print(q2map), 
   width = 1,
-  height_svg = 5.7,
+  height_svg = 5.5,
   width_svg = 4.5,
   tooltip_extra_css = "background-color:#ebedf9;padding:0px;margin:0px;border-radius:4px;"
 )
@@ -268,10 +269,11 @@ save_html(
   tags$html(
     tags$head(includeHTML("stylesMap.html")),
     tags$body(    
-      h2("blbablsad"),
+      h2("Les communes et quartiers populos au centre de Genève, avec des larges différences en ville"),
       div(class = "descr", HTML(
         str_c("Revenu médian des contribuables mariés par commune et par quartiers en 2014",
-              '<img src="https://www.tdg.ch/extern/interactive_wch/tdg/assets/hand_interactive.png" width="24" align="top">&nbsp;'))),
+              '&nbsp;<img src="https://www.tdg.ch/extern/interactive_wch/tdg/assets/hand_interactive.png" width="24" align="top">&nbsp;'))),
+      h3("Quels sont les quartiers huppés/populaires?"),
       div(class="container", imap),
       # div(class = "footer", HTML(footer)),
       div(id = "cite", HTML(footer))

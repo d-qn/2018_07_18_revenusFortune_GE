@@ -1781,7 +1781,8 @@ q2map &lt;- ggplot() +
 q2map &lt;- q2map + 
   theme_map(base_family = baseFont) +
   theme(legend.position = 'top', 
-        legend.key = element_blank()
+        legend.key = element_blank(),
+        plot.margin = margin(0, 5, 0, 1, &quot;pt&quot;),
         ) +
   scale_fill_viridis_d(
     option = &quot;E&quot;, guide = guide_legend(
@@ -1794,7 +1795,7 @@ q2map &lt;- q2map +
 imap &lt;- ggiraph(
   code = print(q2map), 
   width = 1,
-  height_svg = 5.7,
+  height_svg = 5.5,
   width_svg = 4.5,
   tooltip_extra_css = &quot;background-color:#ebedf9;padding:0px;margin:0px;border-radius:4px;&quot;
 )
@@ -1810,10 +1811,11 @@ save_html(
   tags$html(
     tags$head(includeHTML(&quot;stylesMap.html&quot;)),
     tags$body(    
-      h2(&quot;blbablsad&quot;),
+      h2(&quot;Les communes et quartiers populos au centre de Genève, avec des larges différences en ville&quot;),
       div(class = &quot;descr&quot;, HTML(
         str_c(&quot;Revenu médian des contribuables mariés par commune et par quartiers en 2014&quot;,
-              '&lt;img src=&quot;https://www.tdg.ch/extern/interactive_wch/tdg/assets/hand_interactive.png&quot; width=&quot;24&quot; align=&quot;top&quot;&gt;&amp;nbsp;'))),
+              '&amp;nbsp;&lt;img src=&quot;https://www.tdg.ch/extern/interactive_wch/tdg/assets/hand_interactive.png&quot; width=&quot;24&quot; align=&quot;top&quot;&gt;&amp;nbsp;'))),
+      h3(&quot;Quels sont les quartiers huppés/populaires?&quot;),
       div(class=&quot;container&quot;, imap),
       # div(class = &quot;footer&quot;, HTML(footer)),
       div(id = &quot;cite&quot;, HTML(footer))
@@ -2225,94 +2227,97 @@ villeShareM &lt;- left_join(inlet_geo, rville %&gt;%
 ## 01_analyseAndViz.Rmd:241:33: style: Trailing whitespace is superfluous.
 ##   theme(legend.position = 'top', 
 ##                                 ^
-## 01_analyseAndViz.Rmd:246:1: style: lines should not be more than 80 characters.
+## 01_analyseAndViz.Rmd:247:1: style: lines should not be more than 80 characters.
 ##     nrow = 1, direction = 'horizontal', label.hjust = 0, label.position = 'bottom', 
 ## ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-## 01_analyseAndViz.Rmd:246:27: style: Only use double-quotes.
+## 01_analyseAndViz.Rmd:247:27: style: Only use double-quotes.
 ##     nrow = 1, direction = 'horizontal', label.hjust = 0, label.position = 'bottom', 
 ##                           ^~~~~~~~~~~~
-## 01_analyseAndViz.Rmd:246:75: style: Only use double-quotes.
+## 01_analyseAndViz.Rmd:247:75: style: Only use double-quotes.
 ##     nrow = 1, direction = 'horizontal', label.hjust = 0, label.position = 'bottom', 
 ##                                                                           ^~~~~~~~
-## 01_analyseAndViz.Rmd:246:84: style: Trailing whitespace is superfluous.
+## 01_analyseAndViz.Rmd:247:84: style: Trailing whitespace is superfluous.
 ##     nrow = 1, direction = 'horizontal', label.hjust = 0, label.position = 'bottom', 
 ##                                                                                    ^
-## 01_analyseAndViz.Rmd:253:23: style: Trailing whitespace is superfluous.
+## 01_analyseAndViz.Rmd:254:23: style: Trailing whitespace is superfluous.
 ##   code = print(q2map), 
 ##                       ^
-## 01_analyseAndViz.Rmd:257:1: style: lines should not be more than 80 characters.
+## 01_analyseAndViz.Rmd:258:1: style: lines should not be more than 80 characters.
 ##   tooltip_extra_css = &quot;background-color:#ebedf9;padding:0px;margin:0px;border-radius:4px;&quot;
 ## ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-## 01_analyseAndViz.Rmd:262:74: style: Trailing whitespace is superfluous.
+## 01_analyseAndViz.Rmd:263:74: style: Trailing whitespace is superfluous.
 ## footer &lt;- str_c(&quot;source: &quot;, &quot;Office cantonal de la statistique &amp; OFS | &quot;, 
 ##                                                                          ^
-## 01_analyseAndViz.Rmd:263:1: style: lines should not be more than 80 characters.
+## 01_analyseAndViz.Rmd:264:1: style: lines should not be more than 80 characters.
 ##                 &quot;code: &quot;, htmlLink(&quot;https://github.com/davidgohel/ggiraph&quot;, &quot;ggiraph&quot;), 
 ## ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-## 01_analyseAndViz.Rmd:263:88: style: Trailing whitespace is superfluous.
+## 01_analyseAndViz.Rmd:264:88: style: Trailing whitespace is superfluous.
 ##                 &quot;code: &quot;, htmlLink(&quot;https://github.com/davidgohel/ggiraph&quot;, &quot;ggiraph&quot;), 
 ##                                                                                        ^
-## 01_analyseAndViz.Rmd:270:15: style: Trailing whitespace is superfluous.
+## 01_analyseAndViz.Rmd:271:15: style: Trailing whitespace is superfluous.
 ##     tags$body(    
 ##               ^~~~
-## 01_analyseAndViz.Rmd:273:1: style: lines should not be more than 80 characters.
+## 01_analyseAndViz.Rmd:272:1: style: lines should not be more than 80 characters.
+##       h2(&quot;Les communes et quartiers populos au centre de Genève, avec des larges différences en ville&quot;),
+## ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## 01_analyseAndViz.Rmd:274:1: style: lines should not be more than 80 characters.
 ##         str_c(&quot;Revenu médian des contribuables mariés par commune et par quartiers en 2014&quot;,
 ## ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-## 01_analyseAndViz.Rmd:274:1: style: lines should not be more than 80 characters.
-##               '&lt;img src=&quot;https://www.tdg.ch/extern/interactive_wch/tdg/assets/hand_interactive.png&quot; width=&quot;24&quot; align=&quot;top&quot;&gt;&amp;nbsp;'))),
-## ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-## 01_analyseAndViz.Rmd:275:16: style: Put spaces around all infix operators.
+## 01_analyseAndViz.Rmd:275:1: style: lines should not be more than 80 characters.
+##               '&amp;nbsp;&lt;img src=&quot;https://www.tdg.ch/extern/interactive_wch/tdg/assets/hand_interactive.png&quot; width=&quot;24&quot; align=&quot;top&quot;&gt;&amp;nbsp;'))),
+## ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## 01_analyseAndViz.Rmd:277:16: style: Put spaces around all infix operators.
 ##       div(class=&quot;container&quot;, imap),
 ##               ~^~
-## 01_analyseAndViz.Rmd:286:71: style: Trailing whitespace is superfluous.
+## 01_analyseAndViz.Rmd:288:71: style: Trailing whitespace is superfluous.
 ##   geom_sf(data = dat %&gt;% filter(quantile == &quot;q2&quot;, contrib == &quot;marie&quot;), 
 ##                                                                       ^
-## 01_analyseAndViz.Rmd:289:26: style: Trailing whitespace is superfluous.
+## 01_analyseAndViz.Rmd:291:26: style: Trailing whitespace is superfluous.
 ##   facet_grid(~quantile) + 
 ##                          ^
-## 01_analyseAndViz.Rmd:294:8: style: Trailing whitespace is superfluous.
+## 01_analyseAndViz.Rmd:296:8: style: Trailing whitespace is superfluous.
 ## dat %&gt;% 
 ##        ^
-## 01_analyseAndViz.Rmd:295:24: style: Trailing whitespace is superfluous.
+## 01_analyseAndViz.Rmd:297:24: style: Trailing whitespace is superfluous.
 ##   arrange(quantile) %&gt;% 
 ##                        ^
-## 01_analyseAndViz.Rmd:296:33: style: Trailing whitespace is superfluous.
+## 01_analyseAndViz.Rmd:298:33: style: Trailing whitespace is superfluous.
 ##   filter(contrib == &quot;marie&quot;) %&gt;% 
 ##                                 ^
-## 01_analyseAndViz.Rmd:297:64: style: Trailing whitespace is superfluous.
+## 01_analyseAndViz.Rmd:299:64: style: Trailing whitespace is superfluous.
 ##   group_by(nom) %&gt;% summarise(q3q1 = revenu[3] / revenu[1]) %&gt;% 
 ##                                                                ^
-## 01_analyseAndViz.Rmd:298:16: style: Trailing whitespace is superfluous.
+## 01_analyseAndViz.Rmd:300:16: style: Trailing whitespace is superfluous.
 ##   ungroup() %&gt;% 
 ##                ^
-## 01_analyseAndViz.Rmd:308:71: style: Trailing whitespace is superfluous.
+## 01_analyseAndViz.Rmd:310:71: style: Trailing whitespace is superfluous.
 ##   geom_sf(data = dat %&gt;% filter(contrib == &quot;marie&quot;, quantile != &quot;q1&quot;), 
 ##                                                                       ^
-## 01_analyseAndViz.Rmd:311:26: style: Trailing whitespace is superfluous.
+## 01_analyseAndViz.Rmd:313:26: style: Trailing whitespace is superfluous.
 ##   facet_grid(~quantile) + 
 ##                          ^
-## 01_analyseAndViz.Rmd:316:42: style: Trailing whitespace is superfluous.
+## 01_analyseAndViz.Rmd:318:42: style: Trailing whitespace is superfluous.
 ## muniShareM &lt;- left_join(muni, revenus %&gt;% 
 ##                                          ^
-## 01_analyseAndViz.Rmd:317:59: style: Trailing whitespace is superfluous.
+## 01_analyseAndViz.Rmd:319:59: style: Trailing whitespace is superfluous.
 ##   mutate(propMarie = marie_nb / (celib_nb + marie_nb)) %&gt;% 
 ##                                                           ^
-## 01_analyseAndViz.Rmd:318:15: style: Variable and function names should be all lowercase.
+## 01_analyseAndViz.Rmd:320:15: style: Variable and function names should be all lowercase.
 ##   select(nom, propMarie))
 ##               ^~~~~~~~~
-## 01_analyseAndViz.Rmd:323:47: style: Trailing whitespace is superfluous.
+## 01_analyseAndViz.Rmd:325:47: style: Trailing whitespace is superfluous.
 ## villeShareM &lt;- left_join(inlet_geo, rville %&gt;% 
 ##                                               ^
-## 01_analyseAndViz.Rmd:324:59: style: Trailing whitespace is superfluous.
+## 01_analyseAndViz.Rmd:326:59: style: Trailing whitespace is superfluous.
 ##   mutate(propMarie = marie_nb / (celib_nb + marie_nb)) %&gt;% 
 ##                                                           ^
-## 01_analyseAndViz.Rmd:325:15: style: Variable and function names should be all lowercase.
+## 01_analyseAndViz.Rmd:327:15: style: Variable and function names should be all lowercase.
 ##   select(nom, propMarie))
 ##               ^~~~~~~~~
-## 01_analyseAndViz.Rmd:340:1: style: lines should not be more than 80 characters.
+## 01_analyseAndViz.Rmd:342:1: style: lines should not be more than 80 characters.
 ##   ori.files &lt;- list.files(&quot;output&quot;, full.names = T)[list.files(&quot;output&quot;) != &quot;bak&quot;]
 ## ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-## 01_analyseAndViz.Rmd:344:1: style: lines should not be more than 80 characters.
+## 01_analyseAndViz.Rmd:346:1: style: lines should not be more than 80 characters.
 ##   files_tomove &lt;- lapply(files, function(x) list.files(pattern = x)) %&gt;% unlist()
 ## ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</code></pre>
 

@@ -203,7 +203,7 @@ q2datv <- datv %>%
   spread(quantile, revenu) %>%
   mutate(
     catrev = cut(q2, brks, labels = brks_labels),
-    tp = str_c("<h4>", nom, '</h4><div class = "tp">', 
+    tp = str_c('<div class = "tp"><b>', nom, '</b><br>', 
                "revenu médian des couples mariés: <b>", format(q2, big.mark = " "), " </b>CHF<br><br>",
                "revenu Q1*: ", format(q1, big.mark = " "),  " CHF<br>",
                "revenu Q3*: ", format(q3, big.mark = " "),  " CHF<br>")
@@ -213,12 +213,18 @@ q2datc <-  dat %>%  filter(contrib == 'marie') %>%
   spread(quantile, revenu) %>%
   mutate(
     catrev = cut(q2, brks, labels = brks_labels),
-    tp = str_c("<h4>", nom, '</h4><div class = "tp">', 
+    tp = str_c('<div class = "tp"><b>', nom, '</b><br>', 
                "revenu médian des couples mariés: <b>", format(q2, big.mark = " "), " </b>CHF<br>",
                "revenu Q1*: ", format(q1, big.mark = " "),  " CHF<br>",
                "revenu Q3*: ", format(q3, big.mark = " "),  " CHF<br>")
     )
 
+inlet_sfc_bbox <- circle_inlet_sfc %>% st_bbox()
+inlet_label <- tibble(
+  x = inlet_coord$centre %>% st_coordinates() %>% as.tibble() %>% .$X,
+  y = inlet_sfc_bbox$ymax -770,
+  label = "Ville de Genève"
+)
 
 q2map <- ggplot() +
   geom_sf(data = cone_sfc, fill = "#dcb7dc", lwd = NA, alpha = 0.15) +  
@@ -231,7 +237,9 @@ q2map <- ggplot() +
           aes(fill = catrev, data_id = NR, tooltip = tp), lwd = 0.06, colour = bordercol)  +
   geom_sf(
     data = water, lwd = 0.9, fill = watercol, alpha = 1, colour = watercol
-  )# +
+  ) +
+  geom_text(data = inlet_label, aes(x = x, y = y, label = label), hjust = 0.5, vjust = 1,
+            family = baseFont, size = 2.5, alpha = 1, fontface = "bold", colour = "#404040")
   # geom_text(data = labels,
   #           aes(x = X, y = Y, label = nom), family = baseFont,
   #           size = 1.1, alpha = 1, check_overlap = T, colour = labelcol )
@@ -240,22 +248,21 @@ q2map <- q2map +
   theme_map(base_family = baseFont) +
   theme(legend.position = 'top', 
         legend.key = element_blank(),
-        plot.margin = margin(0, 5, 0, 1, "pt"),
+        plot.margin = margin(-5, 5, 0, 1, "pt"),
         ) +
   scale_fill_viridis_d(
-    option = "E", guide = guide_legend(
+    option = "D", guide = guide_legend(
     nrow = 1, direction = 'horizontal', label.hjust = 0, label.position = 'bottom', 
     keywidth = 2, keyheight = 0.5, title = ""))  +
   coord_sf(datum = NA, expand = F)
-
 
   
 imap <- ggiraph(
   code = print(q2map), 
   width = 1,
-  height_svg = 5.5,
+  height_svg = 5,
   width_svg = 4.5,
-  tooltip_extra_css = "background-color:#ebedf9;padding:0px;margin:0px;border-radius:4px;"
+  tooltip_extra_css = "background-color:#d9d9d9;padding:0px;margin:0px;border-radius:4px;"
 )
 
 
@@ -273,11 +280,14 @@ save_html(
       div(class = "descr", HTML(
         str_c("Revenu médian des contribuables mariés par commune et par quartiers en 2014",
               '&nbsp;<img src="https://www.tdg.ch/extern/interactive_wch/tdg/assets/hand_interactive.png" width="24" align="top">&nbsp;'))),
-      h3("Quels sont les quartiers huppés/populaires?"),
-      div(class="container", imap),
+
+      div(class="container", 
+          div(class = "h3in", HTML("Quels sont les quartiers huppés/populaires?")),
+          imap
+      ),
       # div(class = "footer", HTML(footer)),
       div(id = "cite", HTML(footer))
-    )), file = "carte_revenuMedian.html", libdir = "js"
+    )), file = "carte_revenuMedian2.html", libdir = "js"
 )
     
     

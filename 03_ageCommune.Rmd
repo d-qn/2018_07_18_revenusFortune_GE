@@ -1,0 +1,185 @@
+---
+title: "Age communes GE"
+author: "Duc-Quang Nguyen | Tribune de Genève | Tamedia"
+date: " 2018"
+output: 
+  html_document:
+    code_folding: hide
+    echo: TRUE
+    warning: FALSE
+    message: FALSE
+    toc: yes
+    toc_depth: 3
+    toc_float: true
+    theme: simplex
+---
+
+## Data
+
+[stat-tab Population résidante permanente et non permanente selon les niveaux géographiques institutionnels, le sexe, la nationalité (catégorie) et l'âge](https://www.pxweb.bfs.admin.ch/pxweb/fr/px-x-0102010000_101/-/px-x-0102010000_101.px)
+
+```{r setup, include=FALSE}
+locationCode_subset <- c('8100', 'GE', 6600:6650)
+cleanOutput <- F
+downloadPx <- F
+wranglePx <- F
+
+age.url <- "https://www.pxweb.bfs.admin.ch/DownloadFile.aspx?file=px-x-0102010000_101"
+
+require(pxR)
+require(lintr)
+require(here)
+
+library(tidyverse)
+library(magrittr)
+library(stringr)
+library(knitr)
+library(sf)
+library(tamMap)
+library(tamTheme)
+library(hrbrthemes)
+library(ggridges)
+library(skimr)
+
+### Interactive 
+library(ggiraph)
+library(htmltools)
+library(swiRcharts)
+library(highcharter)
+
+### Misc stuff
+#require(classInt)
+#require(viridis)
+```
+
+```{r download px files}
+if(downloadPx) {
+  download.file(age.url, "data/px-x-0102010000_101.px")
+}
+```
+```{r wrangle px data}
+if(wranglePx) {
+  pxa <- ofsPx_wrangle("data/px-x-0102010000_101.px", attachCode = "Canton.......District........Commune.........") %>% 
+    as.tibble()  
+  
+  pxa %<>% filter(
+    pxa$Age != "Age - Total",
+    Année == 2016,
+    Type.de.population == "Population résidante permanente",
+    Sexe == "Sexe - Total"
+  ) %>% 
+    select(-`Type.de.population`, -Sexe, -Année) %>% 
+    rename(
+      nat = `Nationalité..catégorie.`,
+      loc = `Canton.......District........Commune.........`,
+      loc_code = `Canton.......District........Commune........._code`
+    ) %>% 
+    # reformat Age as numeric
+    mutate(
+      Age = str_replace(Age, " ans?", ""),
+      Age = as.numeric(str_replace(Age, " ou plus", "")),      
+      )
+  # filter Geneva, Switzerland
+  pxge <- pxa %>% filter(loc_code %in% locationCode_subset)
+  
+  # write everything down
+  pxge %>% write_csv("input/pxge_age_muni.csv")
+} else {
+  pxge <- read_csv("input/pxge_age_muni.csv")
+}
+```
+
+```{r EDA}
+loc_pos <- tibble(
+  loc = unique(pxge$loc), 
+  loc_pos = (unique(pxge$loc) %>% length()):1
+)
+pxge <- left_join(pxge, loc_pos) %>% 
+  group_by(loc, loc_pos) %>% 
+  mutate(
+    totAge = sum(value),
+    age = (value / totAge) * 100
+  ) %>% 
+  ungroup()
+
+brks <- seq(0, 100, 10)
+
+pxge %<>% mutate(
+  age_group = cut(Age, breaks = 10, 
+                  label = formatBreaks(brks), right = T)
+)
+
+pxb <- pxge %>% 
+  filter(nat == "Nationalité (catégorie) - Total") %>% 
+  group_by(loc, loc_code, age_group) %>% 
+   summarise(value = sum(value)) %>% 
+  ungroup() %>% 
+  group_by(loc, loc_code) %>% 
+    mutate(pop = sum(value)) %>% 
+  ungroup() %>% 
+  group_by(loc, loc_code) %>% 
+    mutate(share = (value / pop)* 100) %>% 
+  ungroup() 
+
+
+pxb <- left_join(pxb, 
+          pxb %>% 
+            filter(loc_code == "GE") %>% 
+            rename(shareCanton = share) %>% 
+            select(age_group, shareCanton)
+          ) %>% 
+        mutate(diffCanton = share - shareCanton)
+# pxge %>% group_by(loc, loc_pos) %>% 
+#   summarise(check = sum(age)) %>% 
+#   ungroup() %>% 
+#   .$check
+
+
+pxge %>% 
+  filter(nat == "Nationalité (catégorie) - Total") %>% 
+  ggplot() +
+    geom_area(aes(x = Age, y = age, group  = loc)) +
+  facet_wrap(~loc)
+
+pxge %>% 
+  filter(nat == "Nationalité (catégorie) - Total") %>% 
+  ggplot() +
+    geom_area(aes(x = Age, y = age, group  = loc)) +
+  facet_wrap(~loc)
+
+pxge %>% 
+  filter(nat == "Nationalité (catégorie) - Total") %>% 
+ggplot() +
+  geom_tile(aes(x = Age, y = loc, fill = age)) +
+  scale_fill_viridis_c()
+
+pxb %>% ggplot() +
+  geom_col(aes(x = age_group, y = diffCanton, group = loc, fill = age_group)) +
+  facet_wrap(~ loc)
+
+
+```
+
+
+```{r move production graphics}
+if (cleanOutput) {
+  files <- c("basename_.*html", "js")
+
+  if (!dir.exists("output/bak")) {
+    dir.create("output/bak")
+  } else {
+    list.files("output/bak/", full.names = T, recursive = T) %>% file.remove()
+  }
+  ori.files <- list.files("output", full.names = T)[list.files("output") != "bak"]
+  file.copy(ori.files, to = "output/bak/", recursive = T)
+  unlink(ori.files, recursive = T)
+
+  files_tomove <- lapply(files, function(x) list.files(pattern = x)) %>% unlist()
+  file.copy(files_tomove, "output", recursive = T)
+  unlink(files_tomove, recursive = T)
+}
+```
+
+```{r linting}
+lintr::lint(knitr::current_input())
+```

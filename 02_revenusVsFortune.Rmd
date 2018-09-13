@@ -1,0 +1,455 @@
+---
+title: "Revenus et fortunes à Genève"
+author: "Duc-Quang Nguyen | Tribune de Genève | Tamedia"
+date: " 2018"
+output: 
+  html_document:
+    code_folding: hide
+    echo: TRUE
+    warning: FALSE
+    message: FALSE
+    toc: yes
+    toc_depth: 3
+    toc_float: true
+    theme: simplex
+---
+
+```{r setup, include=FALSE}
+revenus_commune <- "data/T_20_02_3_21.xlsx"
+fortune_commune <- "data/T_20_02_3_31.xls"
+cleanOutput <- F
+
+require(lintr)
+library(tidyverse)
+library(magrittr)
+library(stringr)
+library(knitr)
+library(tamMap)
+library(sf)
+library(tamTheme)
+library(hrbrthemes)
+
+### Interactive 
+library(ggrepel)
+library(highcharter)
+library(htmltools)
+library(classInt)
+```
+
+```{r load revenus}
+revenus <- readxl::read_excel(
+  revenus_commune, range = "A20:Q64", col_names = F) %>% 
+  select(-X__4, -X__6, -X__11, -X__13)
+names(revenus) <- c('nom', 'effectif_abs', 'effectif_pc',
+                    'marie_nb', 'marie_q1', 'marie_q2', 'marie_q3', 'marie_q3q1',
+                    'celib_nb', 'celib_q1', 'celib_q2', 'celib_q3', 'celib_q3q1') 
+revenus %<>% select(-effectif_abs, -effectif_pc, -marie_q3q1, -celib_q3q1)
+
+# make it long
+longify <- function(df, groupName = "marie", var = "revenu") {
+  dfsub <- df %>% 
+    select(nom, starts_with(groupName))
+  colnames(dfsub) <- c('nom', 'n', 'q1', 'q2', 'q3')
+  
+  dfsub %<>% 
+    gather("quantile", value = !!var, -nom, -n) %>% 
+    mutate(contrib = groupName)
+  dfsub
+}
+
+rvn <- bind_rows(longify(revenus, "marie"), longify(revenus, "celib"))
+
+## load fortune ##
+fortune <- readxl::read_excel(fortune_commune, range = "A20:O64", col_names = F) %>% 
+  select(-X__4, -X__6, -X__10, -X__12)
+
+names(fortune) <- c('nom', 'effectif_abs', 'effectif_pc',
+                    'marie_nb', 'marie_q1', 'marie_q2', 'marie_q3',
+                    'celib_nb', 'celib_q1', 'celib_q2', 'celib_q3') 
+fortune %<>% select(-effectif_abs, -effectif_pc)
+fot <- bind_rows(longify(fortune, "marie", var = "fortune"), longify(fortune, "celib",  var = "fortune"))
+
+# bind both datasets
+stopifnot(all(rvn$nom == fot$nom))
+stopifnot(all(rvn$n == fot$n))
+stopifnot(all(rvn$quantile == fot$quantile))
+stopifnot(all(rvn$contrib == fot$contrib))
+
+rvft <- rvn
+rvft$fortune <- as.numeric(fot$fortune)
+```
+
+```{r EDA}
+rvft %>% ggplot(aes(x = revenu, y = fortune)) +
+  geom_smooth(se = FALSE, method = "lm", formula = y ~ poly(x, 2), linetype = "dashed") +
+  geom_point(aes(size = n, colour = revenu, group = nom)) + 
+  theme_tam(base_size = 11) +
+  facet_grid(contrib ~ quantile, scales = "free")
+
+# analyse Q3/Q1 rapport interquartile
+interQ <- rvft %>% arrange(quantile) %>%  
+  group_by(contrib, nom) %>% 
+  mutate(
+    interQ_revenu = revenu[which(quantile == "q3")] / revenu[which(quantile == "q1")],
+    interQ_fortune = fortune[which(quantile == "q3")] / fortune[which(quantile == "q1")] 
+    ) %>% ungroup()
+
+
+interQ %>% filter(quantile == "q2") %>% 
+  ggplot(aes(x = revenu, y = interQ_revenu)) +
+  geom_point(aes(size = n, group = nom)) +
+  geom_text(aes(label = nom), check_overlap = T) +
+  facet_wrap(~contrib, scales = "free")
+
+rviq <- rvft %>% 
+  arrange(nom) %>%
+  select(-fortune) %>% 
+  spread(quantile, revenu) %>% 
+  mutate(
+    interQ = q3 / q1,
+    # order factor by the interQ of married couples
+    nom = fct_reorder(nom, q2, first)
+  )
+
+rviq %>% filter(contrib == "marie") %>% 
+  ggplot() +
+  geom_col(aes(x = nom, y = interQ))
+
+rviq %>% filter(contrib == "marie") %>% 
+  ggplot() +
+  geom_point(aes(x = q2, y = interQ, group = nom, colour = q2, size = n)) +
+  theme_tam()
+
+```
+
+
+                              <br><br>**Q1 et Q3 (1 <sup>er</sup> et 3 <sup>ème</sup> quantile) séparent également les contribuables en deux groupes, Q1 avec 25% déclarant un revenu moindre tandis que pour Q3 75% ont rapporté un revenu inférieur.</em>"
+                              
+                              
+```{r prod lollipop ecart revenus, eval = F}
+rviq_marie <- rviq %>% 
+  filter(contrib == "marie")
+
+brks <- rviq_marie %>% .$interQ %>% range() %>% pretty()
+formatBreaks <- function(brks) {
+  brks_labels <- "" 
+  for(i in 1:(length(brks)-1)) {
+    if(i == 1) {
+      brks_labels <- str_c("< ",  brks[i+1])
+    } else if (i == (length(brks) - 1)){
+      brks_labels <- c(brks_labels, str_c("> ",  brks[i]))    
+    } else {
+      brks_labels <- c(brks_labels, str_c(brks[i], "-", brks[i+1]))  
+    }
+  }
+  brks_labels
+}
+
+rviq_marie %<>% 
+  mutate(bins = cut(interQ, breaks = brks, labels = formatBreaks(brks)))
+
+gpl <- rviq_marie %>% 
+  ggplot() +
+  geom_segment(aes(x = q1, xend = q3, y = nom, 
+    yend = nom), size = 5, colour = "#e6e6e6") +
+  geom_segment(aes(x = q1, xend = q3, y = nom, 
+    yend = nom, colour = bins), size = 1) +
+  geom_point(aes(x = q1, y = nom), shape = 18, size = 2) +
+  geom_point(aes(x = q3, y = nom), shape = 18, size = 2) +
+  geom_point(aes(x = q2, y = nom), shape = 1) +
+  geom_area(aes(x = q1, y = nom)) +
+  geom_text(
+    aes(x = q1 - 6000, y = nom, label = as.character(nom)),
+    family = "Titillium Web", hjust = 1, size = 2, colour = "#262626"
+  ) +
+  scale_x_continuous(
+    name = "revenu annuel brut CHF des contribuables mariés, 2014",
+    limits = c(0, 5.1e5), 
+    expand = c(0,0), 
+    position = "top",
+    labels = function(x) format(x, big.mark = "'", scientific = FALSE)
+  ) +
+  theme_tam(base_size = 10) +
+  scale_colour_viridis_d(
+   # option = "B", 
+    name = "Ecarts entre revenus\nQ3/Q1",
+    guide = guide_legend(
+      title.position = "top",
+      ncol = 1, 
+      direction = 'vertical', 
+      label.hjust = 0, 
+      label.position = 'right', 
+      byrow = F,
+      override.aes = list(size = 5) ### important to size!
+    )) +
+  ylab("") +
+  theme(
+    axis.text.y = element_blank(),
+    axis.ticks.y = element_blank(),
+    axis.line.y = element_blank(),
+    panel.grid.major.x =  element_line(color = "#cccccc", 
+                                       linetype = "dotted", size = 0.1),
+    plot.margin = unit(c(0, 0.7, 0, 0.6), "lines"),
+    legend.position = c(0.6, 0.3),
+    legend.justification = 0,
+    axis.title = element_text(
+      hjust = 0, size = 7, colour = "#666666", face = "italic"
+    )) + 
+      labs(y = NULL)
+
+igpl <- ggiraph(
+  code = print(gpl),
+  width = 1,
+  height_svg = 5,
+  width_svg = 4
+  )
+
+
+footer <- str_c("source: ", "Office cantonal de la statistique", 
+                " | Tribune de Genève")
+    
+save_html(
+  tags$html(
+    tags$head(includeHTML("style.html")),
+    tags$body(    
+      h2(HTML("Les communes les plus riches, souvent les moins égalitaires")),
+      div(class = "descr", HTML(
+        str_c("le 1er et 3ème quartile (Q1 et Q3). Ce jargon signifie que le revenu Q1, 25% des contribuables mariés de cette commune ont déclaré un revenu moindre tandis que pour Q3, 75% ont rapporté un revenu inférieur"))),
+      div(class="container", 
+          # div(class = "h3in", HTML("Quels sont les quartiers huppés ou populaires?")),
+          igpl
+      ),
+      div(id = "cite", HTML(footer))
+    )), file = "lollipop_dispersion.html", libdir = "js"
+)
+
+```
+
+
+```{r prod revenus vs fortune}
+rvft_marieMedian <- rvft %>% 
+  filter(quantile == "q2", contrib == "marie")
+rvft_marieMedian %<>% 
+  mutate(tp = str_c(
+    '<div class = "tp"><h3>', nom, '</h3>', 
+    "Revenu médian: <b>", format(revenu, big.mark = " "), 
+    " </b>CHF<br>",
+    "Fortune médiane: <b>", format(fortune, big.mark = " "), 
+    " </b>CHF<br>",
+    "effectif: ", n
+    )
+  )
+
+
+money.lm = lm(fortune ~ revenu, data=rvft_marieMedian)
+coeffs <- coefficients(money.lm)
+
+x1 <- 100000
+y1 = coeffs[1] + coeffs[2] * x1
+x2 <- 250000
+y2 = coeffs[1] + coeffs[2] * x2
+reg <- data.frame(
+  x = c(x1, x2), 
+  y = c(y1, y2), 
+  name = "regression line")
+
+
+hcb <- hchart(
+  rvft_marieMedian, "bubble", 
+  hcaes(x = revenu, y = fortune, size = n, color = revenu, tp = tp, name = nom)
+) %>% 
+  hc_chart(
+    animation = list(duration = 1000),
+    height = 520
+  ) %>% 
+  hc_plotOptions(
+     bubble = list(
+        dataLabels = list(
+          verticalAlign = "top",
+          enabled = T, 
+          formatter = JS("function() { return this.point.name; }"), 
+          style = list(
+            textShadow = F,
+            fontSize = "0.6em",
+            fontWeight = "normal"
+          )),
+          maxSize = "30%", minSize = 15
+        ),
+     line = list(marker = list(
+       enabled = FALSE, states = list(hover = list(enabled = F))
+       ), lineWidth = 1.5, dashStyle = "dash", stickyTracking = F) ## for better tooltip, not random!
+     ) %>%
+   hc_yAxis( labels = list(format = '{value:,.0f}.-'),
+             title = list(text = "Fortune"),
+             min = -90000, 
+             startOnTick = F) %>% 
+   hc_xAxis( 
+     labels = list(format = '{value:,.0f}.-'),
+      title = list(text = "Revenu annuel brut")) %>%  
+   hc_tooltip(
+      #positioner = JS("function () { return { x: 0, y: 0 };}"),
+      formatter = JS("function() { return this.point.tp;}"), 
+      useHTML = TRUE,
+      borderWidth = 1
+    ) %>%
+   hc_add_theme(hc_theme_tg)
+
+hcb <- hcb %>%  hc_add_series(
+  name = "Regression", 
+  type = "line",
+  data = reg
+)
+
+
+labelOpt <- list(
+  backgroundColor = 'rgba(255,255,255,0)',
+  verticalAlign = 'middle',
+  y = 0,
+  borderWidth = 0,
+  useHTML= T,
+  style = list(
+    fontSize = "1em",
+    color = "#b6b8c9"
+  )
+  )
+    
+hcb %<>% 
+  hc_add_annotation(
+    labelOptions = labelOpt,
+    labels = list(
+             list(
+                 point = list(
+                     xAxis = 0,
+                     yAxis = 0,
+                     x = 220000,
+                     y = 200000
+                 ),
+                 text = "↘ Moins de fortune
+                 <br>que de revenu"
+             ),
+              list(
+                 point = list(
+                     xAxis = 0,
+                     yAxis = 0,
+                     x = 160000,
+                     y = 820000
+                 ),
+                 text = "Plus de fortune<br>
+                 que de revenu ↖"
+             )
+         )    
+  )
+
+footer <- str_c("source: ", "Office cantonal de la statistique", 
+                " | Tribune de Genève | ",
+                htmlLink("https://twitter.com/duc_qn", "@duc_qn"))
+    
+save_html(
+  tags$html(
+    tags$head(includeCSS(style_tam_highcharter())),
+    tags$body(    
+      h2(HTML("Le revenu et la fortune selon la commune sont sans surprise liés")),
+      div(class = "descr", HTML(
+        str_c("Revenu annuel brut médian vs fortune nette médiane des contribuables mariés selon la commune en 2014",
+              '&nbsp;<img src="https://www.tdg.ch/extern/interactive_wch/tdg/assets/hand_interactive.png" width="14" align="top">  La taille des cercles est proportionnelle aux effectifs (nombres de contribuables mariés). La ligne représente la tendance linéaire entre revenu et fortune.'))),
+      div(class="container", 
+          hcb
+      ),
+      div(id = "cite", HTML(footer))
+    )), file = "bubble_revenuVsFortune.html", libdir = "js"
+)
+```
+
+```{r ggiraph version, eval = F}
+gp <- rvft_marieMedian %>% 
+  ggplot(aes(x = revenu, y = fortune)) +
+  geom_smooth(se = FALSE, method = "lm", formula = y ~ poly(x, 2), linetype = "dashed", colour = '#d22d6f') +
+  geom_point_interactive(
+    aes(size = n, fill = revenu, group = nom, 
+        tooltip = tp, data_id = nom), 
+    alpha = 0.6, stroke = 0.1, shape = 21, colour = "white") +
+  geom_text(
+    aes(label = nom), size = 1.5, vjust = 1.2, 
+    nudge_y = -13000, check_overlap = T, family = font_tw, alpha = 0.8,
+    colour = "#d1618e") +
+  scale_size_continuous(name = "", range = c(6, 27), guide = F) +
+  scale_fill_viridis_c(guide = F) +
+  scale_x_continuous(
+    name = "Revenu annuel brut", expand = c(0.058,0), 
+    labels = function(x) format(x, big.mark = "'", scientific = FALSE)
+  ) +
+  scale_y_continuous(
+    breaks = scales::pretty_breaks(n = 5),
+    name = "Fortune ",
+    expand = c(0.055,0), 
+    labels = function(x) format(x, big.mark = "'", scientific = FALSE)
+  ) +
+  theme_tam(base_size = 8, xGridLines = T) +
+  theme(
+    axis.title.y = element_text(angle = 0, margin = margin(r = -25)),
+    plot.margin = unit(c(1, 0.5, 1, 0.2), "lines")
+    )
+
+igp <- ggiraph(
+  code = print(gp), 
+  width = 1,
+  height_svg = 5,
+  tooltip_offx = -80,
+  tooltip_offy = -50,
+  width_svg = 4,
+  tooltip_extra_css ="background-color:#dedeed;padding:0px;margin:0px;border-radius:3px;"
+)
+
+
+footer <- str_c("source: ", "Office cantonal de la statistique", 
+                "code: ", 
+                htmlLink("https://github.com/davidgohel/ggiraph", "ggiraph"), 
+                " | Tribune de Genève | ",
+                htmlLink("https://twitter.com/duc_qn", "@duc_qn"))
+    
+save_html(
+  tags$html(
+    tags$head(includeHTML("style.html")),
+    tags$body(    
+      h2(HTML("Le revenu et la fortune selon la commune sont sans surprise liés")),
+      div(class = "descr", HTML(
+        str_c("Revenu annuel brut médian vs fortune nette médiane des contribuables mariés selon la commune en 2014",
+              '&nbsp;<img src="https://www.tdg.ch/extern/interactive_wch/tdg/assets/hand_interactive.png" width="20" align="top">La taille des cercles est proportionnelle aux effectifs et donc aux nombres de contribuables mariés.'))),
+      div(class="container", 
+          # div(class = "h3in", HTML("Quels sont les quartiers huppés ou populaires?")),
+          igp
+      ),
+      # div(id = "footer", HTML("<em>*La médiane correspond ici au revenu divisant les contribuables mariés en deux groupes de taille égale. Une moitié a rapporté un revenu bruit moindre, l'autre moitié un revenu supérieur.<br><br>**Q1 et Q3 (1 <sup>er</sup> et 3 <sup>ème</sup> quantile) séparent également les contribuables en deux groupes, Q1 avec 25% déclarant un revenu moindre tandis que pour Q3 75% ont rapporté un revenu inférieur.</em>")),
+      div(id = "cite", HTML(footer))
+    )), file = "scatter_revenuVsFortune.html", libdir = "js"
+)
+
+
+```
+
+
+
+
+
+```{r move production graphics}
+if (cleanOutput) {
+  files <- c("basename_.*html", "js")
+
+  if (!dir.exists("output/bak")) {
+    dir.create("output/bak")
+  } else {
+    list.files("output/bak/", full.names = T, recursive = T) %>% file.remove()
+  }
+  ori.files <- list.files("output", full.names = T)[list.files("output") != "bak"]
+  file.copy(ori.files, to = "output/bak/", recursive = T)
+  unlink(ori.files, recursive = T)
+
+  files_tomove <- lapply(files, function(x) list.files(pattern = x)) %>% unlist()
+  file.copy(files_tomove, "output", recursive = T)
+  unlink(files_tomove, recursive = T)
+}
+```
+
+```{r linting}
+lintr::lint(knitr::current_input())
+```

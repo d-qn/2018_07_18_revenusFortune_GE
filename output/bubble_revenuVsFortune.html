@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8"/>
+<script src="js/htmlwidgets-1.2/htmlwidgets.js"></script>
+<script src="js/jquery-1.11.1/jquery.min.js"></script>
+<script src="js/proj4js-2.3.15/proj4.js"></script>
+<link href="js/highcharts-6.0.3/css/motion.css" rel="stylesheet" />
+<script src="js/highcharts-6.0.3/highcharts.js"></script>
+<script src="js/highcharts-6.0.3/highcharts-3d.js"></script>
+<script src="js/highcharts-6.0.3/highcharts-more.js"></script>
+<script src="js/highcharts-6.0.3/modules/stock.js"></script>
+<script src="js/highcharts-6.0.3/modules/heatmap.js"></script>
+<script src="js/highcharts-6.0.3/modules/treemap.js"></script>
+<script src="js/highcharts-6.0.3/modules/annotations.js"></script>
+<script src="js/highcharts-6.0.3/modules/boost.js"></script>
+<script src="js/highcharts-6.0.3/modules/data.js"></script>
+<script src="js/highcharts-6.0.3/modules/drag-panes.js"></script>
+<script src="js/highcharts-6.0.3/modules/drilldown.js"></script>
+<script src="js/highcharts-6.0.3/modules/funnel.js"></script>
+<script src="js/highcharts-6.0.3/modules/item-series.js"></script>
+<script src="js/highcharts-6.0.3/modules/offline-exporting.js"></script>
+<script src="js/highcharts-6.0.3/modules/overlapping-datalabels.js"></script>
+<script src="js/highcharts-6.0.3/modules/parallel-coordinates.js"></script>
+<script src="js/highcharts-6.0.3/modules/sankey.js"></script>
+<script src="js/highcharts-6.0.3/modules/solid-gauge.js"></script>
+<script src="js/highcharts-6.0.3/modules/streamgraph.js"></script>
+<script src="js/highcharts-6.0.3/modules/sunburst.js"></script>
+<script src="js/highcharts-6.0.3/modules/vector.js"></script>
+<script src="js/highcharts-6.0.3/modules/wordcloud.js"></script>
+<script src="js/highcharts-6.0.3/modules/xrange.js"></script>
+<script src="js/highcharts-6.0.3/modules/exporting.js"></script>
+<script src="js/highcharts-6.0.3/modules/export-data.js"></script>
+<script src="js/highcharts-6.0.3/maps/modules/map.js"></script>
+<script src="js/highcharts-6.0.3/plugins/grouped-categories.js"></script>
+<script src="js/highcharts-6.0.3/plugins/motion.js"></script>
+<script src="js/highcharts-6.0.3/plugins/multicolor_series.js"></script>
+<script src="js/highcharts-6.0.3/custom/reset.js"></script>
+<script src="js/highcharts-6.0.3/custom/symbols-extra.js"></script>
+<script src="js/highcharts-6.0.3/custom/text-symbols.js"></script>
+<script src="js/highchart-binding-0.6.0/highchart.js"></script>
+  <style type="text/css">@import url('https://fonts.googleapis.com/css?family=Playfair+Display:400,700|Titillium+Web:200,300,400,700');
+
+/* ensure data labels are not visible over the tooltip:
+http://stackoverflow.com/questions/15130311/highcharts-labels-visible-over-tooltip */
+.label {
+  z-index: 1 !important;
+}
+
+.highcharts-tooltip span {
+  opacity:1;
+  z-index:9000 !important;
+}
+
+.tooltip {
+  padding:5px;
+}
+
+body {
+  text-rendering: optimizeLegibility;
+  max-width:100%;
+  margin:2px 15px 2px 5px;
+}
+
+body, h1, h2, h5, h6m .descr, td, table {
+    font-family: 'Titillium Web', sans-serif;
+}
+
+h3, .h3in, h4 {
+    font-family: 'Playfair Display', sans-serif;
+}
+
+@media only screen and (max-width: 600px) {
+  html { font-size: 13px; }
+}
+
+#cite {
+  font-weight: 200;
+  font-size: 0.7em;
+  color: #333333;
+  text-align:right;
+  margin-right:5px;
+  padding-bottom: 9px;
+}
+#cite a {
+	text-decoration: none;
+	color: #307ec3;
+}
+
+#footer {
+  font-weight: 300;
+  background-color: #f2f2f3;
+  font-size: 0.75em;
+  color: #595959;
+  padding: 6px;
+  margin-bottom:8px;
+}
+
+.tp{
+  font-size: 0.7em;
+  margin-left: 3px;
+  padding: 0 2px 3px 5px;
+}
+
+.tpsubtitle {
+  font-style: italic;
+  margin-left: 3px;
+  font-size: 0.7em;
+  margin-bottom: 2px;
+  padding: 0 2px 3px 5px;
+}
+
+.descr {
+ font-size: 1em;
+ font-weight: 200;
+ color: #1d1f30;
+ margin-top: 5px;
+ line-height: 130%
+}
+
+h1 {
+   font-size:2em;
+}
+
+h2 {
+   font-size:1.6em;
+   line-height: 125%;
+   font-weight: 700;
+   margin-bottom: 4px;
+   margin-top: 1px;
+   color: #242d75;
+}
+
+h3 {
+   font-size:1.3em;
+   color: #1a1a1a;
+   font-weight: 700;
+}
+
+.h3in {
+   position: relative;
+   text-align: center;
+   font-size: 1.15em;
+   color: #1a1a1a;
+   font-weight: 700;
+   top: 30vw;
+   padding: 5px;
+   margin-right: 20px;
+   margin-left: 62%;
+}
+
+h4 {
+  font-size: 1.2em;
+  margin-top: 3px;
+  margin-bottom: 2px;
+}
+
+h5 {
+   font-size:0.85em;
+}
+
+h6 {
+   font-size:0.8em;
+}
+
+a:visited {
+   color: #194266;
+}
+
+a, a:visited {
+  text-decoration: underline;
+}
+
+/* https://stackoverflow.com/questions/11984767/how-to-apply-text-align-left-in-the-first-column-and-text-align-right-in-the-oth , specify class table then when creating it*/
+.table {
+  line-height: 1.1;
+}
+.table td:first-child { text-align: left; }
+.table td:last-child { text-align: right; }</style>
+</head>
+<body style="background-color:white;">
+<html>
+  <body>
+    <h2>Le revenu et la fortune selon la commune sont sans surprise liés</h2>
+    <div class="descr">Revenu annuel brut médian vs fortune nette médiane des contribuables mariés selon la commune en 2014&nbsp;<img src="https://www.tdg.ch/extern/interactive_wch/tdg/assets/hand_interactive.png" width="14" align="top">  La taille des cercles est proportionnelle aux effectifs (nombres de contribuables mariés). La ligne représente la tendance linéaire entre revenu et fortune.</div>
+    <div class="container">
+      <div id="htmlwidget-a94fe7a6fa789375f081" style="width:100%;height:500px;" class="highchart html-widget"></div>
+      <script type="application/json" data-for="htmlwidget-a94fe7a6fa789375f081">{"x":{"hc_opts":{"title":{"text":null},"yAxis":{"title":{"text":"Fortune"},"type":"linear","labels":{"format":"{value:,.0f}.-"},"min":-90000,"startOnTick":false},"credits":{"enabled":false},"exporting":{"enabled":false},"plotOptions":{"series":{"label":{"enabled":false},"turboThreshold":0,"showInLegend":false},"treemap":{"layoutAlgorithm":"squarified"},"scatter":{"marker":{"symbol":"circle"}},"bubble":{"dataLabels":{"verticalAlign":"top","enabled":true,"formatter":"function() { return this.point.name; }","style":{"textShadow":false,"fontSize":"0.6em","fontWeight":"normal"}},"maxSize":"30%","minSize":15},"line":{"marker":{"enabled":false,"states":{"hover":{"enabled":false}}},"lineWidth":1.5,"dashStyle":"dash","stickyTracking":false}},"series":[{"group":"group","data":[{"nom":"Aire-la-Ville","n":244,"quantile":"q2","revenu":188643,"contrib":"marie","fortune":335328,"tp":"<div class = \"tp\"><h3>Aire-la-Ville<\/h3>Revenu médian: <b>188 643 <\/b>CHF<br>Fortune médiane: <b>335 328 <\/b>CHF<br>effectif: 244","x":188643,"y":335328,"size":244,"color":"#7BB361","name":"Aire-la-Ville","colorv":188643,"z":244},{"nom":"Anières","n":405,"quantile":"q2","revenu":220801,"contrib":"marie","fortune":655318,"tp":"<div class = \"tp\"><h3>Anières<\/h3>Revenu médian: <b>220 801 <\/b>CHF<br>Fortune médiane: <b>655 318 <\/b>CHF<br>effectif: 405","x":220801,"y":655318,"size":405,"color":"#F3E329","name":"Anières","colorv":220801,"z":405},{"nom":"Avully","n":311,"quantile":"q2","revenu":134381,"contrib":"marie","fortune":119560,"tp":"<div class = \"tp\"><h3>Avully<\/h3>Revenu médian: <b>134 381 <\/b>CHF<br>Fortune médiane: <b>119 560 <\/b>CHF<br>effectif: 311","x":134381,"y":119560,"size":311,"color":"#34426D","name":"Avully","colorv":134381,"z":311},{"nom":"Avusy","n":304,"quantile":"q2","revenu":200631,"contrib":"marie","fortune":454010,"tp":"<div class = \"tp\"><h3>Avusy<\/h3>Revenu médian: <b>200 631 <\/b>CHF<br>Fortune médiane: <b>454 010 <\/b>CHF<br>effectif: 304","x":200631,"y":454010,"size":304,"color":"#B7CB45","name":"Avusy","colorv":200631,"z":304},{"nom":"Bardonnex","n":412,"quantile":"q2","revenu":161137,"contrib":"marie","fortune":301804,"tp":"<div class = \"tp\"><h3>Bardonnex<\/h3>Revenu médian: <b>161 137 <\/b>CHF<br>Fortune médiane: <b>301 804 <\/b>CHF<br>effectif: 412","x":161137,"y":301804,"size":412,"color":"#2A697C","name":"Bardonnex","colorv":161137,"z":412},{"nom":"Bellevue","n":500,"quantile":"q2","revenu":156314,"contrib":"marie","fortune":259513,"tp":"<div class = \"tp\"><h3>Bellevue<\/h3>Revenu médian: <b>156 314 <\/b>CHF<br>Fortune médiane: <b>259 513 <\/b>CHF<br>effectif: 500","x":156314,"y":259513,"size":500,"color":"#2D5C77","name":"Bellevue","colorv":156314,"z":500},{"nom":"Bernex","n":1873,"quantile":"q2","revenu":151242,"contrib":"marie","fortune":278057,"tp":"<div class = \"tp\"><h3>Bernex<\/h3>Revenu médian: <b>151 242 <\/b>CHF<br>Fortune médiane: <b>278 057 <\/b>CHF<br>effectif: 1873","x":151242,"y":278057,"size":1873,"color":"#2F5575","name":"Bernex","colorv":151242,"z":1873},{"nom":"Carouge","n":3201,"quantile":"q2","revenu":123167,"contrib":"marie","fortune":50345,"tp":"<div class = \"tp\"><h3>Carouge<\/h3>Revenu médian: <b>123 167 <\/b>CHF<br>Fortune médiane: <b> 50 345 <\/b>CHF<br>effectif: 3201","x":123167,"y":50345,"size":3201,"color":"#3A2863","name":"Carouge","colorv":123167,"z":3201},{"nom":"Cartigny","n":159,"quantile":"q2","revenu":190971,"contrib":"marie","fortune":435967,"tp":"<div class = \"tp\"><h3>Cartigny<\/h3>Revenu médian: <b>190 971 <\/b>CHF<br>Fortune médiane: <b>435 967 <\/b>CHF<br>effectif: 159","x":190971,"y":435967,"size":159,"color":"#8FBB58","name":"Cartigny","colorv":190971,"z":159},{"nom":"Céligny","n":117,"quantile":"q2","revenu":169565,"contrib":"marie","fortune":270104,"tp":"<div class = \"tp\"><h3>Céligny<\/h3>Revenu médian: <b>169 565 <\/b>CHF<br>Fortune médiane: <b>270 104 <\/b>CHF<br>effectif: 117","x":169565,"y":270104,"size":117,"color":"#3F9B7D","name":"Céligny","colorv":169565,"z":117},{"nom":"Chancy","n":274,"quantile":"q2","revenu":163957,"contrib":"marie","fortune":153997,"tp":"<div class = \"tp\"><h3>Chancy<\/h3>Revenu médian: <b>163 957 <\/b>CHF<br>Fortune médiane: <b>153 997 <\/b>CHF<br>effectif: 274","x":163957,"y":153997,"size":274,"color":"#257C84","name":"Chancy","colorv":163957,"z":274},{"nom":"Chêne-Bougeries","n":1842,"quantile":"q2","revenu":167293,"contrib":"marie","fortune":391761,"tp":"<div class = \"tp\"><h3>Chêne-Bougeries<\/h3>Revenu médian: <b>167 293 <\/b>CHF<br>Fortune médiane: <b>391 761 <\/b>CHF<br>effectif: 1842","x":167293,"y":391761,"size":1842,"color":"#2A9387","name":"Chêne-Bougeries","colorv":167293,"z":1842},{"nom":"Chêne-Bourg","n":1330,"quantile":"q2","revenu":120801,"contrib":"marie","fortune":65041,"tp":"<div class = \"tp\"><h3>Chêne-Bourg<\/h3>Revenu médian: <b>120 801 <\/b>CHF<br>Fortune médiane: <b> 65 041 <\/b>CHF<br>effectif: 1330","x":120801,"y":65041,"size":1330,"color":"#3C2160","name":"Chêne-Bourg","colorv":120801,"z":1330},{"nom":"Choulex","n":188,"quantile":"q2","revenu":205657,"contrib":"marie","fortune":571237,"tp":"<div class = \"tp\"><h3>Choulex<\/h3>Revenu médian: <b>205 657 <\/b>CHF<br>Fortune médiane: <b>571 237 <\/b>CHF<br>effectif: 188","x":205657,"y":571237,"size":188,"color":"#DFDB33","name":"Choulex","colorv":205657,"z":188},{"nom":"Collex-Bossy","n":283,"quantile":"q2","revenu":180507,"contrib":"marie","fortune":383851,"tp":"<div class = \"tp\"><h3>Collex-Bossy<\/h3>Revenu médian: <b>180 507 <\/b>CHF<br>Fortune médiane: <b>383 851 <\/b>CHF<br>effectif: 283","x":180507,"y":383851,"size":283,"color":"#67AB6B","name":"Collex-Bossy","colorv":180507,"z":283},{"nom":"Collonge-Bellerive","n":1443,"quantile":"q2","revenu":203507,"contrib":"marie","fortune":664961,"tp":"<div class = \"tp\"><h3>Collonge-Bellerive<\/h3>Revenu médian: <b>203 507 <\/b>CHF<br>Fortune médiane: <b>664 961 <\/b>CHF<br>effectif: 1443","x":203507,"y":664961,"size":1443,"color":"#D5D737","name":"Collonge-Bellerive","colorv":203507,"z":1443},{"nom":"Cologny","n":845,"quantile":"q2","revenu":196426,"contrib":"marie","fortune":774094,"tp":"<div class = \"tp\"><h3>Cologny<\/h3>Revenu médian: <b>196 426 <\/b>CHF<br>Fortune médiane: <b>774 094 <\/b>CHF<br>effectif: 845","x":196426,"y":774094,"size":845,"color":"#A3C34F","name":"Cologny","colorv":196426,"z":845},{"nom":"Confignon","n":891,"quantile":"q2","revenu":165519,"contrib":"marie","fortune":393459,"tp":"<div class = \"tp\"><h3>Confignon<\/h3>Revenu médian: <b>165 519 <\/b>CHF<br>Fortune médiane: <b>393 459 <\/b>CHF<br>effectif: 891","x":165519,"y":393459,"size":891,"color":"#21908C","name":"Confignon","colorv":165519,"z":891},{"nom":"Corsier","n":382,"quantile":"q2","revenu":202898,"contrib":"marie","fortune":595791,"tp":"<div class = \"tp\"><h3>Corsier<\/h3>Revenu médian: <b>202 898 <\/b>CHF<br>Fortune médiane: <b>595 791 <\/b>CHF<br>effectif: 382","x":202898,"y":595791,"size":382,"color":"#CBD33C","name":"Corsier","colorv":202898,"z":382},{"nom":"Dardagny","n":261,"quantile":"q2","revenu":148347,"contrib":"marie","fortune":169226,"tp":"<div class = \"tp\"><h3>Dardagny<\/h3>Revenu médian: <b>148 347 <\/b>CHF<br>Fortune médiane: <b>169 226 <\/b>CHF<br>effectif: 261","x":148347,"y":169226,"size":261,"color":"#304E72","name":"Dardagny","colorv":148347,"z":261},{"nom":"Genève","n":25465,"quantile":"q2","revenu":114231,"contrib":"marie","fortune":53814,"tp":"<div class = \"tp\"><h3>Genève<\/h3>Revenu médian: <b>114 231 <\/b>CHF<br>Fortune médiane: <b> 53 814 <\/b>CHF<br>effectif: 25465","x":114231,"y":53814,"size":25465,"color":"#3F145B","name":"Genève","colorv":114231,"z":25465},{"nom":"Genthod","n":460,"quantile":"q2","revenu":190299,"contrib":"marie","fortune":489172,"tp":"<div class = \"tp\"><h3>Genthod<\/h3>Revenu médian: <b>190 299 <\/b>CHF<br>Fortune médiane: <b>489 172 <\/b>CHF<br>effectif: 460","x":190299,"y":489172,"size":460,"color":"#85B75D","name":"Genthod","colorv":190299,"z":460},{"nom":"Grand-Saconnex","n":1713,"quantile":"q2","revenu":129417,"contrib":"marie","fortune":116124,"tp":"<div class = \"tp\"><h3>Grand-Saconnex<\/h3>Revenu médian: <b>129 417 <\/b>CHF<br>Fortune médiane: <b>116 124 <\/b>CHF<br>effectif: 1713","x":129417,"y":116124,"size":1713,"color":"#373468","name":"Grand-Saconnex","colorv":129417,"z":1713},{"nom":"Gy","n":86,"quantile":"q2","revenu":201284,"contrib":"marie","fortune":592982,"tp":"<div class = \"tp\"><h3>Gy<\/h3>Revenu médian: <b>201 284 <\/b>CHF<br>Fortune médiane: <b>592 982 <\/b>CHF<br>effectif: 86","x":201284,"y":592982,"size":86,"color":"#C1CF41","name":"Gy","colorv":201284,"z":86},{"nom":"Hermance","n":151,"quantile":"q2","revenu":199806,"contrib":"marie","fortune":487575,"tp":"<div class = \"tp\"><h3>Hermance<\/h3>Revenu médian: <b>199 806 <\/b>CHF<br>Fortune médiane: <b>487 575 <\/b>CHF<br>effectif: 151","x":199806,"y":487575,"size":151,"color":"#ADC74A","name":"Hermance","colorv":199806,"z":151},{"nom":"Jussy","n":234,"quantile":"q2","revenu":177105,"contrib":"marie","fortune":476591,"tp":"<div class = \"tp\"><h3>Jussy<\/h3>Revenu médian: <b>177 105 <\/b>CHF<br>Fortune médiane: <b>476 591 <\/b>CHF<br>effectif: 234","x":177105,"y":476591,"size":234,"color":"#53A374","name":"Jussy","colorv":177105,"z":234},{"nom":"Laconnex","n":131,"quantile":"q2","revenu":182675,"contrib":"marie","fortune":544337,"tp":"<div class = \"tp\"><h3>Laconnex<\/h3>Revenu médian: <b>182 675 <\/b>CHF<br>Fortune médiane: <b>544 337 <\/b>CHF<br>effectif: 131","x":182675,"y":544337,"size":131,"color":"#71AF66","name":"Laconnex","colorv":182675,"z":131},{"nom":"Lancy","n":5316,"quantile":"q2","revenu":119959,"contrib":"marie","fortune":50616,"tp":"<div class = \"tp\"><h3>Lancy<\/h3>Revenu médian: <b>119 959 <\/b>CHF<br>Fortune médiane: <b> 50 616 <\/b>CHF<br>effectif: 5316","x":119959,"y":50616,"size":5316,"color":"#3D1B5E","name":"Lancy","colorv":119959,"z":5316},{"nom":"Meinier","n":368,"quantile":"q2","revenu":159216,"contrib":"marie","fortune":344232,"tp":"<div class = \"tp\"><h3>Meinier<\/h3>Revenu médian: <b>159 216 <\/b>CHF<br>Fortune médiane: <b>344 232 <\/b>CHF<br>effectif: 368","x":159216,"y":344232,"size":368,"color":"#2C627A","name":"Meinier","colorv":159216,"z":368},{"nom":"Meyrin","n":3583,"quantile":"q2","revenu":110527,"contrib":"marie","fortune":43376,"tp":"<div class = \"tp\"><h3>Meyrin<\/h3>Revenu médian: <b>110 527 <\/b>CHF<br>Fortune médiane: <b> 43 376 <\/b>CHF<br>effectif: 3583","x":110527,"y":43376,"size":3583,"color":"#420756","name":"Meyrin","colorv":110527,"z":3583},{"nom":"Onex","n":3260,"quantile":"q2","revenu":113064,"contrib":"marie","fortune":48334,"tp":"<div class = \"tp\"><h3>Onex<\/h3>Revenu médian: <b>113 064 <\/b>CHF<br>Fortune médiane: <b> 48 334 <\/b>CHF<br>effectif: 3260","x":113064,"y":48334,"size":3260,"color":"#400E59","name":"Onex","colorv":113064,"z":3260},{"nom":"Perly-Certoux","n":561,"quantile":"q2","revenu":139874,"contrib":"marie","fortune":152829,"tp":"<div class = \"tp\"><h3>Perly-Certoux<\/h3>Revenu médian: <b>139 874 <\/b>CHF<br>Fortune médiane: <b>152 829 <\/b>CHF<br>effectif: 561","x":139874,"y":152829,"size":561,"color":"#324870","name":"Perly-Certoux","colorv":139874,"z":561},{"nom":"Plan-les-Ouates","n":1819,"quantile":"q2","revenu":164950,"contrib":"marie","fortune":283455,"tp":"<div class = \"tp\"><h3>Plan-les-Ouates<\/h3>Revenu médian: <b>164 950 <\/b>CHF<br>Fortune médiane: <b>283 455 <\/b>CHF<br>effectif: 1819","x":164950,"y":283455,"size":1819,"color":"#248386","name":"Plan-les-Ouates","colorv":164950,"z":1819},{"nom":"Pregny-Chambésy","n":485,"quantile":"q2","revenu":174028,"contrib":"marie","fortune":608969,"tp":"<div class = \"tp\"><h3>Pregny-Chambésy<\/h3>Revenu médian: <b>174 028 <\/b>CHF<br>Fortune médiane: <b>608 969 <\/b>CHF<br>effectif: 485","x":174028,"y":608969,"size":485,"color":"#499F79","name":"Pregny-Chambésy","colorv":174028,"z":485},{"nom":"Presinge","n":104,"quantile":"q2","revenu":163473,"contrib":"marie","fortune":439469,"tp":"<div class = \"tp\"><h3>Presinge<\/h3>Revenu médian: <b>163 473 <\/b>CHF<br>Fortune médiane: <b>439 469 <\/b>CHF<br>effectif: 104","x":163473,"y":439469,"size":104,"color":"#277681","name":"Presinge","colorv":163473,"z":104},{"nom":"Puplinge","n":382,"quantile":"q2","revenu":168392,"contrib":"marie","fortune":289771,"tp":"<div class = \"tp\"><h3>Puplinge<\/h3>Revenu médian: <b>168 392 <\/b>CHF<br>Fortune médiane: <b>289 771 <\/b>CHF<br>effectif: 382","x":168392,"y":289771,"size":382,"color":"#349782","name":"Puplinge","colorv":168392,"z":382},{"nom":"Russin","n":98,"quantile":"q2","revenu":162473,"contrib":"marie","fortune":424318,"tp":"<div class = \"tp\"><h3>Russin<\/h3>Revenu médian: <b>162 473 <\/b>CHF<br>Fortune médiane: <b>424 318 <\/b>CHF<br>effectif: 98","x":162473,"y":424318,"size":98,"color":"#286F7F","name":"Russin","colorv":162473,"z":98},{"nom":"Satigny","n":725,"quantile":"q2","revenu":165121,"contrib":"marie","fortune":275526,"tp":"<div class = \"tp\"><h3>Satigny<\/h3>Revenu médian: <b>165 121 <\/b>CHF<br>Fortune médiane: <b>275 526 <\/b>CHF<br>effectif: 725","x":165121,"y":275526,"size":725,"color":"#228989","name":"Satigny","colorv":165121,"z":725},{"nom":"Soral","n":132,"quantile":"q2","revenu":182537,"contrib":"marie","fortune":525282,"tp":"<div class = \"tp\"><h3>Soral<\/h3>Revenu médian: <b>182 537 <\/b>CHF<br>Fortune médiane: <b>525 282 <\/b>CHF<br>effectif: 132","x":182537,"y":525282,"size":132,"color":"#67AB6B","name":"Soral","colorv":182537,"z":132},{"nom":"Thônex","n":2451,"quantile":"q2","revenu":133038,"contrib":"marie","fortune":199589,"tp":"<div class = \"tp\"><h3>Thônex<\/h3>Revenu médian: <b>133 038 <\/b>CHF<br>Fortune médiane: <b>199 589 <\/b>CHF<br>effectif: 2451","x":133038,"y":199589,"size":2451,"color":"#353B6A","name":"Thônex","colorv":133038,"z":2451},{"nom":"Troinex","n":430,"quantile":"q2","revenu":193693,"contrib":"marie","fortune":446948,"tp":"<div class = \"tp\"><h3>Troinex<\/h3>Revenu médian: <b>193 693 <\/b>CHF<br>Fortune médiane: <b>446 948 <\/b>CHF<br>effectif: 430","x":193693,"y":446948,"size":430,"color":"#99BF53","name":"Troinex","colorv":193693,"z":430},{"nom":"Vandoeuvres","n":448,"quantile":"q2","revenu":248508,"contrib":"marie","fortune":881284,"tp":"<div class = \"tp\"><h3>Vandoeuvres<\/h3>Revenu médian: <b>248 508 <\/b>CHF<br>Fortune médiane: <b>881 284 <\/b>CHF<br>effectif: 448","x":248508,"y":881284,"size":448,"color":"#FDE725","name":"Vandoeuvres","colorv":248508,"z":448},{"nom":"Vernier","n":5832,"quantile":"q2","revenu":104477,"contrib":"marie","fortune":20094,"tp":"<div class = \"tp\"><h3>Vernier<\/h3>Revenu médian: <b>104 477 <\/b>CHF<br>Fortune médiane: <b> 20 094 <\/b>CHF<br>effectif: 5832","x":104477,"y":20094,"size":5832,"color":"#440154","name":"Vernier","colorv":104477,"z":5832},{"nom":"Versoix","n":1954,"quantile":"q2","revenu":123557,"contrib":"marie","fortune":88109,"tp":"<div class = \"tp\"><h3>Versoix<\/h3>Revenu médian: <b>123 557 <\/b>CHF<br>Fortune médiane: <b> 88 109 <\/b>CHF<br>effectif: 1954","x":123557,"y":88109,"size":1954,"color":"#382E65","name":"Versoix","colorv":123557,"z":1954},{"nom":"Veyrier","n":2066,"quantile":"q2","revenu":210336,"contrib":"marie","fortune":573176,"tp":"<div class = \"tp\"><h3>Veyrier<\/h3>Revenu médian: <b>210 336 <\/b>CHF<br>Fortune médiane: <b>573 176 <\/b>CHF<br>effectif: 2066","x":210336,"y":573176,"size":2066,"color":"#E9DF2E","name":"Veyrier","colorv":210336,"z":2066}],"type":"bubble"},{"data":[{"x":100000,"y":-52209.2575979918,"name":"regression line"},{"x":250000,"y":859151.504967662,"name":"regression line"}],"type":"line","name":"Regression"}],"xAxis":{"type":"linear","title":{"text":"Revenu annuel brut"},"labels":{"format":"{value:,.0f}.-"}},"chart":{"animation":{"duration":1000},"height":520},"tooltip":{"formatter":"function() { return this.point.tp;}","useHTML":true,"borderWidth":1},"annotations":[{"labelOptions":{"backgroundColor":"rgba(255,255,255,0)","verticalAlign":"middle","y":0,"borderWidth":0,"useHTML":true,"style":{"fontSize":"1em","color":"#b6b8c9"}},"labels":[{"point":{"xAxis":0,"yAxis":0,"x":220000,"y":200000},"text":"↘ Moins de fortune\n                 <br>que de revenu"},{"point":{"xAxis":0,"yAxis":0,"x":160000,"y":820000},"text":"Plus de fortune<br>\n                 que de revenu ↖"}]}]},"theme":{"colors":["#2a3589","#c6266d","#64baaa","#ff5c4d","#2c647e","#ffa600","#a95c9a","#5ca0f7"],"chart":{"style":{"fontFamily":"Titillium Web"},"spacing":[20,5,2,0]},"title":{"align":"left","x":4,"style":{"color":"#1a1a1a","fontFamily":"Titillium Web","fontSize":"1.6em","fontWeight":"bold"}},"subtitle":{"align":"left","x":4,"style":{"color":"#262626","fontFamily":"Titillium Web","fontWeight":200,"fontSize":"1.3em"}},"legend":{"itemStyle":{"fontFamily":"Titillium Web","fontSize":"1em","color":"black","fontWeight":300},"itemHoverStyle":{"color":"gray"}},"yAxis":{"gridLineColor":"#CEC6B9","lineColor":"#CEC6B9","gridLineDashStyle":"Dot","labels":{"align":"left","x":0,"y":-3,"tickLength":0,"tickColor":"#CEC6B9","tickWidth":1,"style":{"fontWeight":200,"fontSize":"1em","color":"#333333"}},"title":{"align":"high","style":{"fontWeight":400,"fontSize":"1.3em","color":"#333333"}}},"xAxis":{"lineColor":"#CEC6B9","tickLength":6,"tickColor":"#CEC6B9","labels":{"distance":5,"style":{"fontWeight":200,"fontSize":"1em","color":"#333333"}},"title":{"align":"high","margin":3,"style":{"fontWeight":400,"fontSize":"1.3em","color":"#333333"}}},"tooltip":{"borderRadius":10,"padding":4,"style":{"fontFamily":"Titillium Web","fontSize":"0.9em"}}},"conf_opts":{"global":{"Date":null,"VMLRadialGradientURL":"http =//code.highcharts.com/list(version)/gfx/vml-radial-gradient.png","canvasToolsURL":"http =//code.highcharts.com/list(version)/modules/canvas-tools.js","getTimezoneOffset":null,"timezoneOffset":0,"useUTC":true},"lang":{"contextButtonTitle":"Chart context menu","decimalPoint":".","downloadJPEG":"Download JPEG image","downloadPDF":"Download PDF document","downloadPNG":"Download PNG image","downloadSVG":"Download SVG vector image","drillUpText":"Back to {series.name}","invalidDate":null,"loading":"Loading...","months":["January","February","March","April","May","June","July","August","September","October","November","December"],"noData":"No data to display","numericSymbols":["k","M","G","T","P","E"],"printChart":"Print chart","resetZoom":"Reset zoom","resetZoomTitle":"Reset zoom level 1:1","shortMonths":["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"],"thousandsSep":" ","weekdays":["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"]}},"type":"chart","fonts":"Titillium+Web","debug":false},"evals":["hc_opts.plotOptions.bubble.dataLabels.formatter","hc_opts.tooltip.formatter"],"jsHooks":[]}</script>
+    </div>
+    <div id="cite">source: Office cantonal de la statistique | Tribune de Genève | <a href="https://twitter.com/duc_qn" target="_blank">@duc_qn</a></div>
+  </body>
+</html>
+</body>
+</html>

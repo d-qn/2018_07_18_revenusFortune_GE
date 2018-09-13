@@ -1,9 +1,3 @@
-<script src="//files.newsnetz.ch/scripts/dimension_watcher.js"></script>
-<script>
-	DimensionWatcher.watchIframeContent();
-</script>
-
-<!--<link href="https://fonts.googleapis.com/css?family=Titillium+Web:200,300,400,700" rel="stylesheet">-->
 <link href="https://fonts.googleapis.com/css?family=Playfair+Display:700|Titillium+Web:200,300,400,700" rel="stylesheet">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -15,17 +9,16 @@ body {
   margin:2px 15px 2px 5px;
 }
 
-body, h1, h2, h3, h4, h5, h6m .descr, td, table {
+body, h1, h2, h3, h5, h6m .descr, td, table {
     font-family: 'Titillium Web', sans-serif;
 }
 
-h3, .h3in {
+h3, .h3in, h4 {
     font-family: 'Playfair Display', sans-serif;
 }
 
-
 .container {
-    margin-top: -37px; /*   !!!!!!!!!!!!!!!!!!!   manual hack  to reduce margin!!!!*/
+    margin-top: -6vh; /*   !!!!!!!!!!!!!!!!!!!   manual hack  to reduce margin!!!!*/
 }
 /*
 svg {
@@ -37,8 +30,8 @@ svg {
 
 #cite {
   font-weight: 200;
-  font-size: 0.7em;
-  color: #4d4d4d;
+  font-size: 0.9em;
+  color: #333333;
   text-align:right;
   margin-right:5px;
   padding-bottom: 9px;
@@ -49,11 +42,12 @@ svg {
 }
 
 #footer {
-  font-size: 0.8em;
-  color: #333333;
-  padding: 0px;
+  font-weight: 300;
+  background-color: #f2f2f3;
+  font-size: 0.75em;
+  color: #595959;
+  padding: 6px;
   margin-bottom:8px;
-  max-width:80%;
 }
 
 .tp{
@@ -73,7 +67,7 @@ svg {
 .descr {
  font-size: 1.1em;
  font-weight: lighter;
- color: #393e60;
+ color: #1d1f30;
 }
 
 h1 {
@@ -82,7 +76,7 @@ h1 {
 
 h2 {
    font-size:1.5em;
-   line-height: 135%;
+   line-height: 125%;
    font-weight: 700;
    margin-bottom: 3px;
    margin-top: 1px;
@@ -97,29 +91,29 @@ h3 {
 
 .h3in {
    position: relative;
-   text-align:right;
-   font-size:1.3em;
+   text-align: center;
+   font-size: 1.15em;
    color: #1a1a1a;
    font-weight: 700;
-   top: 25vw ;
-   right: 10px;
-   margin-left: 57%; 
+   top: 30vw;
+   padding: 5px;
+   margin-right: 20px;
+   margin-left: 62%;
 }
 
 h4 {
-  font-size: 0.9em;
-  margin-top: 0px;
-  padding-left:4px;
+  font-size: 1.2em;
+  margin-top: 3px;
+  margin-bottom: 2px;
 }
 
 h5 {
-   font-size:0.9em;
+   font-size:0.85em;
 }
 
 h6 {
    font-size:0.8em;
 }
-
 
 a:visited {
    color: #194266;
@@ -134,6 +128,5 @@ a, a:visited {
            font-size: 12px;
     }
 }
-
 
 </style>

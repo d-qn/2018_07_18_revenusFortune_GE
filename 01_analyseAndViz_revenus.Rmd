@@ -1,0 +1,365 @@
+---
+title: "Revenus et fortunes à Genève"
+author: "Duc-Quang Nguyen | Tribune de Genève | Tamedia"
+date: " 2018"
+output: 
+  html_document:
+    code_folding: hide
+    echo: TRUE
+    warning: FALSE
+    message: FALSE
+    toc: yes
+    toc_depth: 3
+    toc_float: true
+    theme: simplex
+---
+
+```{r setup, include=FALSE}
+revenus_commune <- "data/T_20_02_3_21.xlsx"
+revenues_ville <- "data/T_20_02_3_22.xlsx"
+cleanOutput <- F
+downloadWaterGE <- F
+
+require(lintr)
+library(tidyverse)
+library(magrittr)
+library(stringr)
+library(knitr)
+library(tamMap)
+library(tamTheme)
+library(sf)
+library(hrbrthemes)
+
+### Interactive 
+library(ggiraph)
+library(htmltools)
+#library(swiRcharts)
+library(classInt)
+```
+
+```{r load revenus}
+revenus <- readxl::read_excel(revenus_commune, range = "A20:Q64", col_names = F) %>% 
+  select(-X__4, -X__6, -X__11, -X__13)
+names(revenus) <- c('nom', 'effectif_abs', 'effectif_pc',
+                    'marie_nb', 'marie_q1', 'marie_q2', 'marie_q3', 'marie_q3q1',
+                    'celib_nb', 'celib_q1', 'celib_q2', 'celib_q3', 'celib_q3q1') 
+revenus %<>% select(-effectif_abs, -effectif_pc, -marie_q3q1, -celib_q3q1)
+
+# make it long
+longify <- function(df, groupName = "marie") {
+  dfsub <- df %>% 
+    select(nom, starts_with(groupName))
+  colnames(dfsub) <- c('nom', 'n', 'q1', 'q2', 'q3')
+  
+  dfsub %<>% 
+    gather("quantile", "revenu", -nom, -n) %>% 
+    mutate(contrib = groupName)
+  dfsub
+}
+
+
+rvn <- bind_rows(longify(revenus, "marie"), longify(revenus, "celib"))
+
+## GE ville
+rville <- readxl::read_excel(revenues_ville, range = "A20:Q39", col_names = F) %>% 
+  select(-X__4, -X__6, -X__10, -X__11, -X__13, -X__17)
+names(rville) <- c('nom', 'effectif_abs', 'effectif_pc',
+                    'marie_nb', 'marie_q1', 'marie_q2', 'marie_q3',
+                    'celib_nb', 'celib_q1', 'celib_q2', 'celib_q3')
+
+rville %<>% select(-effectif_abs, -effectif_pc) %>% 
+  filter(!nom %in% c('Genève-Cité', 'Plainpalais', 'Eaux-Vives', 'Petit-Saconnex')) %>% 
+  mutate(nom = str_replace(nom, "Cité\\-Centre", "Cité \\- Centre")) %>% 
+  mutate(nom = str_replace(nom, "^La ", "")) %>%   
+  mutate(nom = str_replace(nom, "St\\-Jean \\- Aïre", "St-Jean - Aire"))
+
+
+rvr <- bind_rows(longify(rville, "marie"), longify(rville, "celib"))
+```
+
+```{r EDA}
+gp <- rvn %>% 
+  ggplot() +
+  geom_point(aes(x = fct_reorder(nom, revenu), y = revenu, group = quantile, colour = quantile)) +
+  facet_grid(~ contrib) +
+  ggtitle("Revenus des couples mariés montrent la plus large disparité") +
+  theme_ipsum_tw() +
+  scale_color_ipsum() +
+  theme(
+    axis.text.x = element_text(angle = 90, hjust = 0),
+    legend.position = "top"
+    )
+gp
+gp %+% rvr
+  
+gp2 <- revenus %>% 
+  mutate(propMarie = marie_nb / (celib_nb + marie_nb)) %>% 
+  select(nom, propMarie, marie_q2) %>% 
+  ggplot() +
+    geom_point(
+      aes(x = fct_reorder(nom, propMarie), 
+          y = propMarie, group = nom, size = marie_q2)) + 
+  theme_ipsum_tw() +
+  theme(
+    axis.text.x = element_text(angle = 90, hjust = 0)
+  )
+gp2
+
+rville %>% 
+  mutate(propMarie = marie_nb / (celib_nb + marie_nb)) %>% 
+  select(nom, propMarie, marie_q2) %>% 
+  ggplot() +
+    geom_point(
+      aes(x = fct_reorder(nom, propMarie), 
+          y = propMarie, group = nom, size = marie_q2)) + 
+  theme_ipsum_tw() +
+  theme(
+    axis.text.x = element_text(angle = 90, hjust = 0)
+  )
+
+
+
+```
+
+```{r load maps, eval = T}
+shp_ch_paths_2018 <- shp_path(2018)
+shp_quartiers <- shp_path(dirGeo = "CH/quartiers")
+
+x <- shp_ch_paths_2018['municipalities']
+layerName <- st_layers(x)
+muni <- st_read(x, layer = layerName$name, 
+          options = "ENCODING=latin1", stringsAsFactors = F) %>% 
+  select(ends_with("NR"), ends_with("NAME")) %>% 
+  filter(KTNR == 25) %>% 
+  select(-KTNR) %>% 
+  # remove the GE in the commune name
+  mutate(GMDNAME = str_replace(GMDNAME, " \\(GE\\)$", "")) %>% 
+  # remove Le in  "Le Grand-Saconnex" 
+  mutate(GMDNAME = str_replace(GMDNAME, "^Le ", "")) %>% 
+  rename(nom = GMDNAME)
+
+stopifnot(all(!is.na(match(unique(rvn$nom), unique(muni$nom)))))
+
+
+layerName <- st_layers(shp_quartiers)
+quart <- st_read(shp_quartiers, layer = "quart17", 
+          options = "ENCODING=latin1", stringsAsFactors = F) %>% 
+  filter(GMDE == 6621) %>% 
+  select(NR, NAME, GMDE) %>% 
+  rename(nom = NAME)
+
+stopifnot(all(!is.na(match(unique(rville$nom), unique(quart$nom)))))
+
+if(downloadWaterGE) {
+  library(esri2sf)
+  url <- 'https://ge.ch/sitgags1/rest/services/VECTOR/SITG_OPENDATA_02/MapServer/6186'
+  water <- esri2sf(url)
+  water <- st_transform(water, st_crs(muni))
+  water %>% st_write(dsn = "data/", driver = "ESRI Shapefile", layer = "waterGE.shp")  
+} else {
+  water <- st_read("data/waterGE.shp", layer = "waterGE")
+}
+
+```
+
+```{r prod viz map}
+dat <- left_join(muni, rvn)
+inlet_geo <- shiftScale_geo(geo = quart, scaleF = 3, shiftM = c(-11000, 16000))
+datv <- left_join(inlet_geo, rvr)
+
+# Create circles sf to encompass the inlet map and its original location
+geo_subset_coord <- encircle_coord(quart)
+inlet_coord <- encircle_coord(inlet_geo)
+cone_sfc <- cone_geo(geo_subset_coord, inlet_coord)
+circle_zoom_sfc <- encircle_geo(geo_subset_coord)
+circle_inlet_sfc <- encircle_geo(inlet_coord)
+
+labels <- bind_rows(
+muni %>% st_centroid() %>% 
+  st_coordinates() %>% as_tibble() %>% 
+  mutate(nom = muni$nom),  
+inlet_geo %>% st_centroid() %>% 
+  st_coordinates() %>% as_tibble()  %>% 
+  mutate(nom = inlet_geo$nom) 
+)
+
+watercol <- "#958da6"
+labelcol <- "#f6d5de"
+bordercol <- '#c4c6d4'
+baseFont <-  "Titillium Web"
+# create revenu breaks
+
+brks <- seq(80000, 260000, 20000)
+brks_labels <- c("<100\nmille CHF", "100-120", "120-140", 
+"140-160", "160-180", "180-200", "200-220",
+"220-240", "240+\nmille CHF")
+
+q2datv <- datv %>% 
+  filter(contrib == 'marie') %>% 
+  spread(quantile, revenu) %>%
+  mutate(
+    catrev = cut(q2, brks, labels = brks_labels),
+    tp = str_c('<div class = "tp"><h4>', nom, '</h4>', 
+               "revenu médian des couples mariés: <b>", 
+               format(q2, big.mark = " "), " </b>CHF<br>",
+               "effectif: ", n)
+    )
+
+q2datc <-  dat %>%  filter(contrib == 'marie') %>% 
+  spread(quantile, revenu) %>%
+  mutate(
+    catrev = cut(q2, brks, labels = brks_labels),
+    tp = str_c('<div class = "tp"><h4>', nom, '</h4>', 
+               "revenu médian des couples mariés: <b>", 
+               format(q2, big.mark = " "), " </b>CHF<br>",
+               "effectif: ", n)
+    )
+
+inlet_sfc_bbox <- circle_inlet_sfc %>% st_bbox()
+inlet_label <- tibble(
+  x = inlet_coord$centre %>% st_coordinates() %>% as.tibble() %>% .$X,
+  y = inlet_sfc_bbox$ymax -770,
+  label = "Ville de Genève"
+)
+
+q2map <- ggplot() +
+  geom_sf(data = cone_sfc, fill = "#dcb7dc", lwd = NA, alpha = 0.15) +  
+  geom_sf(data = circle_inlet_sfc, fill = "#dcb7dc", lwd = NA, alpha = 0.15) +
+  geom_sf_interactive(data = q2datc, 
+          aes(fill = catrev, data_id = GMDNR, tooltip = tp), lwd = 0.05, colour = bordercol) +
+  geom_sf(data = muni %>% filter(GMDNR == 6621), 
+          fill = NA, lwd = 0.7, colour = "#ffdaff") +
+  geom_sf_interactive(data = q2datv, 
+          aes(fill = catrev, data_id = NR, tooltip = tp), lwd = 0.06, colour = bordercol)  +
+  geom_sf(
+    data = water, lwd = 0.9, fill = watercol, alpha = 1, colour = watercol
+  ) +
+  geom_text(data = inlet_label, aes(x = x, y = y, label = label), hjust = 0.5, vjust = 1,
+            family = baseFont, size = 2.5, alpha = 1, fontface = "bold", colour = "#404040") #+
+  # geom_text(data = labels,
+  #           aes(x = X, y = Y, label = nom), family = baseFont,
+  #           size = 1.1, alpha = 1, check_overlap = T, colour = labelcol )
+
+
+
+q2map <- q2map + 
+  theme_map(base_family = baseFont) +
+  theme(legend.position = 'top', 
+        legend.key = element_blank(),
+        plot.margin = margin(-5, 5, 0, 1.1, "pt"),
+        ) +
+  scale_fill_viridis_d(
+    option = "D", guide = guide_legend(
+    nrow = 1, direction = 'horizontal', label.hjust = 0, label.position = 'bottom', 
+    keywidth = 2, keyheight = 0.5, title = ""))  +
+  coord_sf(datum = NA, expand = F)
+
+  
+imap <- ggiraph(
+  code = print(q2map), 
+  width = 1,
+  height_svg = 5,
+  tooltip_offx = -50,
+  width_svg = 4.5,
+  tooltip_extra_css = "background-color:#d9d9d9;padding:0px;margin:0px;border-radius:4px;"
+)
+
+
+
+footer <- str_c("source: ", "Administration fiscale cantonale & Office cantonal de la statistique ", 
+                "code: ", htmlLink("https://github.com/davidgohel/ggiraph", "ggiraph"), 
+                " | Tribune de Genève | ",
+                htmlLink("https://twitter.com/duc_qn", "@duc_qn"))
+    
+save_html(
+  tags$html(
+    tags$head(includeHTML("stylesMap.html"), HTML(dimensionWatcher)),
+    tags$body(    
+      h2("Le centre de Genève, le plus populo. Mais des larges différences entre les quartiers de la ville"),
+      div(class = "descr", HTML(
+        str_c("INTERACTIF - Revenu annuel brut médian* des contribuables mariés par commune ou par quartier en 2014",
+              '&nbsp;<img src="https://www.tdg.ch/extern/interactive_wch/tdg/assets/hand_interactive.png" width="20" align="top">',
+" Au niveau cantonal, la médiane s'élève à 127'686 CHF"
+              ))),
+
+      div(class="container", 
+          div(class = "h3in", HTML("Quels sont les quartiers huppés ou populaires?")),
+          imap
+      ),
+      div(id = "footer", HTML("<em>*La médiane correspond ici au revenu divisant les contribuables mariés en deux groupes de taille égale. Une moitié a rapporté un revenu bruit moindre, l'autre moitié un revenu supérieur.</em>")),
+      div(id = "cite", HTML(footer))
+    )), file = "carte_revenuMedian.html", libdir = "js"
+)
+    
+    
+```
+
+```{r viz map}
+ggplot() +
+  geom_sf(data = dat %>% filter(quantile == "q2", contrib == "marie"), 
+    aes(fill = revenu), lwd = 0) +
+  theme_map() +
+  facet_grid(~quantile) + 
+  scale_fill_viridis_c()  +
+  coord_sf(datum = NA, expand = F) +
+  ggtitle("a keeper!, Genève ville populaire")
+
+dat %>% 
+  arrange(quantile) %>% 
+  filter(contrib == "marie") %>% 
+  group_by(nom) %>% summarise(q3q1 = revenu[3] / revenu[1]) %>% 
+  ungroup() %>% 
+  ggplot() +
+  geom_sf(aes(fill = q3q1), lwd = 0) +
+  theme_map() +
+  scale_fill_viridis_c()  +
+  coord_sf(datum = NA, expand = F) +
+  ggtitle("q3 / q1, rien à signaler")
+  
+
+ggplot() +
+  geom_sf(data = dat %>% filter(contrib == "marie", quantile != "q1"), 
+    aes(fill = revenu), lwd = 0) +
+  theme_map() +
+  facet_grid(~quantile) + 
+  scale_fill_viridis_c()  +
+  coord_sf(datum = NA, expand = F)
+
+
+muniShareM <- left_join(muni, revenus %>% 
+  mutate(propMarie = marie_nb / (celib_nb + marie_nb)) %>% 
+  select(nom, propMarie))
+         
+
+
+inlet_geo <- shiftScale_geo(geo = quart, scaleF = 3, shiftM = c(-11000, 16000))
+villeShareM <- left_join(inlet_geo, rville %>% 
+  mutate(propMarie = marie_nb / (celib_nb + marie_nb)) %>% 
+  select(nom, propMarie))
+         
+```
+
+
+
+```{r move production graphics}
+if (cleanOutput) {
+  files <- c("basename_.*html", "js")
+
+  if (!dir.exists("output/bak")) {
+    dir.create("output/bak")
+  } else {
+    list.files("output/bak/", full.names = T, recursive = T) %>% file.remove()
+  }
+  ori.files <- list.files("output", full.names = T)[list.files("output") != "bak"]
+  file.copy(ori.files, to = "output/bak/", recursive = T)
+  unlink(ori.files, recursive = T)
+
+  files_tomove <- lapply(files, function(x) list.files(pattern = x)) %>% unlist()
+  file.copy(files_tomove, "output", recursive = T)
+  unlink(files_tomove, recursive = T)
+}
+```
+
+```{r linting}
+lintr::lint(knitr::current_input())
+```

@@ -488,8 +488,8 @@ imap &lt;- ggiraph(
 
 
 footer &lt;- str_c(&quot;source: &quot;, &quot;Administration fiscale cantonale &amp; Office cantonal de la statistique &quot;, 
-                &quot;code: &quot;, htmlLink(&quot;https://github.com/davidgohel/ggiraph&quot;, &quot;ggiraph&quot;), 
-                &quot; | Tribune de Genève | &quot;,
+                &quot; | code:&amp;nbsp;&quot;, htmlLink(&quot;https://github.com/davidgohel/ggiraph&quot;, &quot;ggiraph&quot;), 
+                &quot; |&amp;nbsp;Tribune&amp;nbsp;de&amp;nbsp;Genève&amp;nbsp;| &quot;,
                 htmlLink(&quot;https://twitter.com/duc_qn&quot;, &quot;@duc_qn&quot;))
     
 save_html(
@@ -960,11 +960,11 @@ villeShareM &lt;- left_join(inlet_geo, rville %&gt;%
 ## footer &lt;- str_c(&quot;source: &quot;, &quot;Administration fiscale cantonale &amp; Office cantonal de la statistique &quot;, 
 ##                                                                                                     ^
 ## 01_analyseAndViz_revenus.Rmd:270:1: style: lines should not be more than 80 characters.
-##                 &quot;code: &quot;, htmlLink(&quot;https://github.com/davidgohel/ggiraph&quot;, &quot;ggiraph&quot;), 
-## ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-## 01_analyseAndViz_revenus.Rmd:270:88: style: Trailing whitespace is superfluous.
-##                 &quot;code: &quot;, htmlLink(&quot;https://github.com/davidgohel/ggiraph&quot;, &quot;ggiraph&quot;), 
-##                                                                                        ^
+##                 &quot; | code:&amp;nbsp;&quot;, htmlLink(&quot;https://github.com/davidgohel/ggiraph&quot;, &quot;ggiraph&quot;), 
+## ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+## 01_analyseAndViz_revenus.Rmd:270:96: style: Trailing whitespace is superfluous.
+##                 &quot; | code:&amp;nbsp;&quot;, htmlLink(&quot;https://github.com/davidgohel/ggiraph&quot;, &quot;ggiraph&quot;), 
+##                                                                                                ^
 ## 01_analyseAndViz_revenus.Rmd:277:15: style: Trailing whitespace is superfluous.
 ##     tags$body(    
 ##               ^~~~

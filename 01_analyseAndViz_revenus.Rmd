@@ -267,8 +267,8 @@ imap <- ggiraph(
 
 
 footer <- str_c("source: ", "Administration fiscale cantonale & Office cantonal de la statistique ", 
-                "code: ", htmlLink("https://github.com/davidgohel/ggiraph", "ggiraph"), 
-                " | Tribune de Genève | ",
+                " | code:&nbsp;", htmlLink("https://github.com/davidgohel/ggiraph", "ggiraph"), 
+                " |&nbsp;Tribune&nbsp;de&nbsp;Genève&nbsp;| ",
                 htmlLink("https://twitter.com/duc_qn", "@duc_qn"))
     
 save_html(
@@ -330,8 +330,6 @@ muniShareM <- left_join(muni, revenus %>%
   mutate(propMarie = marie_nb / (celib_nb + marie_nb)) %>% 
   select(nom, propMarie))
          
-
-
 inlet_geo <- shiftScale_geo(geo = quart, scaleF = 3, shiftM = c(-11000, 16000))
 villeShareM <- left_join(inlet_geo, rville %>% 
   mutate(propMarie = marie_nb / (celib_nb + marie_nb)) %>% 

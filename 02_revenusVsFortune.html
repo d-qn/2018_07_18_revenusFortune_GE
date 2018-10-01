@@ -544,12 +544,12 @@ footer &lt;- str_c(&quot;source: &quot;, &quot;Office cantonal de la statistique
     
 save_html(
   tags$html(
-    tags$head(includeCSS(style_tam_highcharter())),
+    tags$head(includeCSS(style_tam_highcharter()), HTML(dimensionWatcher)),
     tags$body(    
-      h2(HTML(&quot;Le revenu et la fortune selon la commune sont sans surprise liés&quot;)),
+      h2(HTML(&quot;Où vous situez-vous par rapport aux fortunes et revenus médians des Genevois?&quot;)),
       div(class = &quot;descr&quot;, HTML(
         str_c(&quot;Revenu annuel brut médian vs fortune nette médiane des contribuables mariés selon la commune en 2014&quot;,
-              '&amp;nbsp;&lt;img src=&quot;https://www.tdg.ch/extern/interactive_wch/tdg/assets/hand_interactive.png&quot; width=&quot;14&quot; align=&quot;top&quot;&gt;  La taille des cercles est proportionnelle aux effectifs (nombres de contribuables mariés). &lt;span style=&quot;text-decoration:underline;text-decoration-style:dashed;text-decoration-color:#B5376B&quot;&gt;La ligne&lt;/span&gt; représente la tendance linéaire entre revenu et fortune.'))),
+              '&amp;nbsp;&lt;img src=&quot;https://www.tdg.ch/extern/interactive_wch/tdg/assets/hand_interactive.png&quot; width=&quot;17&quot; align=&quot;top&quot;&gt;  La taille des cercles est proportionnelle aux effectifs (nombres de contribuables mariés). La ligne représente la tendance linéaire entre revenu et fortune.'))),
       div(class=&quot;container&quot;, 
           hcb
       ),
@@ -1011,96 +1011,96 @@ save_html(
 ##     tags$body(    
 ##               ^~~~
 ## 02_revenusVsFortune.Rmd:351:1: style: lines should not be more than 80 characters.
-##       h2(HTML(&quot;Le revenu et la fortune selon la commune sont sans surprise liés&quot;)),
-## ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+##       h2(HTML(&quot;Où vous situez-vous par rapport aux fortunes et revenus médians des Genevois?&quot;)),
+## ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ## 02_revenusVsFortune.Rmd:353:1: style: lines should not be more than 80 characters.
 ##         str_c(&quot;Revenu annuel brut médian vs fortune nette médiane des contribuables mariés selon la commune en 2014&quot;,
 ## ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ## 02_revenusVsFortune.Rmd:354:1: style: lines should not be more than 80 characters.
-##               '&amp;nbsp;&lt;img src=&quot;https://www.tdg.ch/extern/interactive_wch/tdg/assets/hand_interactive.png&quot; width=&quot;14&quot; align=&quot;top&quot;&gt;  La taille des cercles est proportionnelle aux effectifs (nombres de contribuables mariés). &lt;span style=&quot;text-decoration:underline;text-decoration-style:dashed;text-decoration-color:#B5376B&quot;&gt;La ligne&lt;/span&gt; représente la tendance linéaire entre revenu et fortune.'))),
-## ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+##               '&amp;nbsp;&lt;img src=&quot;https://www.tdg.ch/extern/interactive_wch/tdg/assets/hand_interactive.png&quot; width=&quot;17&quot; align=&quot;top&quot;&gt;  La taille des cercles est proportionnelle aux effectifs (nombres de contribuables mariés). La ligne représente la tendance linéaire entre revenu et fortune.'))),
+## ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 ## 02_revenusVsFortune.Rmd:355:16: style: Put spaces around all infix operators.
 ##       div(class=&quot;container&quot;, 
 ##               ~^~
 ## 02_revenusVsFortune.Rmd:355:29: style: Trailing whitespace is superfluous.
 ##       div(class=&quot;container&quot;, 
 ##                             ^
-## 02_revenusVsFortune.Rmd:367:27: style: Trailing whitespace is superfluous.
+## 02_revenusVsFortune.Rmd:364:27: style: Trailing whitespace is superfluous.
 ## gp &lt;- rvft_marieMedian %&gt;% 
 ##                           ^
-## 02_revenusVsFortune.Rmd:369:1: style: lines should not be more than 80 characters.
+## 02_revenusVsFortune.Rmd:366:1: style: lines should not be more than 80 characters.
 ##   geom_smooth(se = FALSE, method = &quot;lm&quot;, formula = y ~ poly(x, 2), linetype = &quot;dashed&quot;, colour = '#d22d6f') +
 ## ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-## 02_revenusVsFortune.Rmd:369:98: style: Only use double-quotes.
+## 02_revenusVsFortune.Rmd:366:98: style: Only use double-quotes.
 ##   geom_smooth(se = FALSE, method = &quot;lm&quot;, formula = y ~ poly(x, 2), linetype = &quot;dashed&quot;, colour = '#d22d6f') +
 ##                                                                                                  ^~~~~~~~~
-## 02_revenusVsFortune.Rmd:371:46: style: Trailing whitespace is superfluous.
+## 02_revenusVsFortune.Rmd:368:46: style: Trailing whitespace is superfluous.
 ##     aes(size = n, fill = revenu, group = nom, 
 ##                                              ^
-## 02_revenusVsFortune.Rmd:372:38: style: Trailing whitespace is superfluous.
+## 02_revenusVsFortune.Rmd:369:38: style: Trailing whitespace is superfluous.
 ##         tooltip = tp, data_id = nom), 
 ##                                      ^
-## 02_revenusVsFortune.Rmd:375:47: style: Trailing whitespace is superfluous.
+## 02_revenusVsFortune.Rmd:372:47: style: Trailing whitespace is superfluous.
 ##     aes(label = nom), size = 1.5, vjust = 1.2, 
 ##                                               ^
-## 02_revenusVsFortune.Rmd:381:51: style: Commas should always have a space after.
+## 02_revenusVsFortune.Rmd:378:51: style: Commas should always have a space after.
 ##     name = &quot;Revenu annuel brut&quot;, expand = c(0.058,0), 
 ##                                                   ^
-## 02_revenusVsFortune.Rmd:381:54: style: Trailing whitespace is superfluous.
+## 02_revenusVsFortune.Rmd:378:54: style: Trailing whitespace is superfluous.
 ##     name = &quot;Revenu annuel brut&quot;, expand = c(0.058,0), 
 ##                                                      ^
-## 02_revenusVsFortune.Rmd:387:22: style: Commas should always have a space after.
+## 02_revenusVsFortune.Rmd:384:22: style: Commas should always have a space after.
 ##     expand = c(0.055,0), 
 ##                      ^
-## 02_revenusVsFortune.Rmd:387:25: style: Trailing whitespace is superfluous.
+## 02_revenusVsFortune.Rmd:384:25: style: Trailing whitespace is superfluous.
 ##     expand = c(0.055,0), 
 ##                         ^
-## 02_revenusVsFortune.Rmd:397:20: style: Trailing whitespace is superfluous.
+## 02_revenusVsFortune.Rmd:394:20: style: Trailing whitespace is superfluous.
 ##   code = print(gp), 
 ##                    ^
-## 02_revenusVsFortune.Rmd:403:1: style: lines should not be more than 80 characters.
+## 02_revenusVsFortune.Rmd:400:1: style: lines should not be more than 80 characters.
 ##   tooltip_extra_css =&quot;background-color:#dedeed;padding:0px;margin:0px;border-radius:3px;&quot;
 ## ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-## 02_revenusVsFortune.Rmd:403:21: style: Put spaces around all infix operators.
+## 02_revenusVsFortune.Rmd:400:21: style: Put spaces around all infix operators.
 ##   tooltip_extra_css =&quot;background-color:#dedeed;padding:0px;margin:0px;border-radius:3px;&quot;
 ##                     ^~
-## 02_revenusVsFortune.Rmd:407:65: style: Trailing whitespace is superfluous.
+## 02_revenusVsFortune.Rmd:404:65: style: Trailing whitespace is superfluous.
 ## footer &lt;- str_c(&quot;source: &quot;, &quot;Office cantonal de la statistique&quot;, 
 ##                                                                 ^
-## 02_revenusVsFortune.Rmd:408:26: style: Trailing whitespace is superfluous.
+## 02_revenusVsFortune.Rmd:405:26: style: Trailing whitespace is superfluous.
 ##                 &quot;code: &quot;, 
 ##                          ^
-## 02_revenusVsFortune.Rmd:409:78: style: Trailing whitespace is superfluous.
+## 02_revenusVsFortune.Rmd:406:78: style: Trailing whitespace is superfluous.
 ##                 htmlLink(&quot;https://github.com/davidgohel/ggiraph&quot;, &quot;ggiraph&quot;), 
 ##                                                                              ^
-## 02_revenusVsFortune.Rmd:416:15: style: Trailing whitespace is superfluous.
+## 02_revenusVsFortune.Rmd:413:15: style: Trailing whitespace is superfluous.
 ##     tags$body(    
 ##               ^~~~
-## 02_revenusVsFortune.Rmd:417:1: style: lines should not be more than 80 characters.
+## 02_revenusVsFortune.Rmd:414:1: style: lines should not be more than 80 characters.
 ##       h2(HTML(&quot;Le revenu et la fortune selon la commune sont sans surprise liés&quot;)),
 ## ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-## 02_revenusVsFortune.Rmd:419:1: style: lines should not be more than 80 characters.
+## 02_revenusVsFortune.Rmd:416:1: style: lines should not be more than 80 characters.
 ##         str_c(&quot;Revenu annuel brut médian vs fortune nette médiane des contribuables mariés selon la commune en 2014&quot;,
 ## ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-## 02_revenusVsFortune.Rmd:420:1: style: lines should not be more than 80 characters.
+## 02_revenusVsFortune.Rmd:417:1: style: lines should not be more than 80 characters.
 ##               '&amp;nbsp;&lt;img src=&quot;https://www.tdg.ch/extern/interactive_wch/tdg/assets/hand_interactive.png&quot; width=&quot;20&quot; align=&quot;top&quot;&gt;La taille des cercles est proportionnelle aux effectifs et donc aux nombres de contribuables mariés.'))),
 ## ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-## 02_revenusVsFortune.Rmd:421:16: style: Put spaces around all infix operators.
+## 02_revenusVsFortune.Rmd:418:16: style: Put spaces around all infix operators.
 ##       div(class=&quot;container&quot;, 
 ##               ~^~
-## 02_revenusVsFortune.Rmd:421:29: style: Trailing whitespace is superfluous.
+## 02_revenusVsFortune.Rmd:418:29: style: Trailing whitespace is superfluous.
 ##       div(class=&quot;container&quot;, 
 ##                             ^
-## 02_revenusVsFortune.Rmd:422:1: style: lines should not be more than 80 characters.
+## 02_revenusVsFortune.Rmd:419:1: style: lines should not be more than 80 characters.
 ##           # div(class = &quot;h3in&quot;, HTML(&quot;Quels sont les quartiers huppés ou populaires?&quot;)),
 ## ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-## 02_revenusVsFortune.Rmd:425:1: style: lines should not be more than 80 characters.
+## 02_revenusVsFortune.Rmd:422:1: style: lines should not be more than 80 characters.
 ##       # div(id = &quot;footer&quot;, HTML(&quot;&lt;em&gt;*La médiane correspond ici au revenu divisant les contribuables mariés en deux groupes de taille égale. Une moitié a rapporté un revenu bruit moindre, l'autre moitié un revenu supérieur.&lt;br&gt;&lt;br&gt;**Q1 et Q3 (1 &lt;sup&gt;er&lt;/sup&gt; et 3 &lt;sup&gt;ème&lt;/sup&gt; quantile) séparent également les contribuables en deux groupes, Q1 avec 25% déclarant un revenu moindre tandis que pour Q3 75% ont rapporté un revenu inférieur.&lt;/em&gt;&quot;)),
 ## ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-## 02_revenusVsFortune.Rmd:446:1: style: lines should not be more than 80 characters.
+## 02_revenusVsFortune.Rmd:443:1: style: lines should not be more than 80 characters.
 ##   ori.files &lt;- list.files(&quot;output&quot;, full.names = T)[list.files(&quot;output&quot;) != &quot;bak&quot;]
 ## ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-## 02_revenusVsFortune.Rmd:450:1: style: lines should not be more than 80 characters.
+## 02_revenusVsFortune.Rmd:447:1: style: lines should not be more than 80 characters.
 ##   files_tomove &lt;- lapply(files, function(x) list.files(pattern = x)) %&gt;% unlist()
 ## ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~</code></pre>
 

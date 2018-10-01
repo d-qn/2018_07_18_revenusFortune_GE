@@ -346,12 +346,12 @@ footer <- str_c("source: ", "Office cantonal de la statistique",
     
 save_html(
   tags$html(
-    tags$head(includeCSS(style_tam_highcharter())),
+    tags$head(includeCSS(style_tam_highcharter()), HTML(dimensionWatcher)),
     tags$body(    
-      h2(HTML("Le revenu et la fortune selon la commune sont sans surprise liés")),
+      h2(HTML("Où vous situez-vous par rapport aux fortunes et revenus médians des Genevois?")),
       div(class = "descr", HTML(
         str_c("Revenu annuel brut médian vs fortune nette médiane des contribuables mariés selon la commune en 2014",
-              '&nbsp;<img src="https://www.tdg.ch/extern/interactive_wch/tdg/assets/hand_interactive.png" width="14" align="top">  La taille des cercles est proportionnelle aux effectifs (nombres de contribuables mariés). La ligne représente la tendance linéaire entre revenu et fortune.'))),
+              '&nbsp;<img src="https://www.tdg.ch/extern/interactive_wch/tdg/assets/hand_interactive.png" width="17" align="top">  La taille des cercles est proportionnelle aux effectifs (nombres de contribuables mariés). La ligne représente la tendance linéaire entre revenu et fortune.'))),
       div(class="container", 
           hcb
       ),

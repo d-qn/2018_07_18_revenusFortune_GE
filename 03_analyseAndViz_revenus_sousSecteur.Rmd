@@ -15,8 +15,7 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-revenus_commune <- "data/T_20_02_3_21.xlsx"
-revenues_ville <- "data/T_20_02_3_22.xlsx"
+revenus_xls <- "data/T_20_02_3_23.xls"
 cleanOutput <- F
 downloadWaterGE <- F
 
@@ -33,172 +32,43 @@ library(hrbrthemes)
 ### Interactive 
 library(ggiraph)
 library(htmltools)
-#library(swiRcharts)
 library(classInt)
 ```
 
-```{r load revenus}
-revenus <- readxl::read_excel(revenus_commune, range = "A20:Q64", col_names = F) %>% 
-  select(-X__4, -X__6, -X__11, -X__13)
-names(revenus) <- c('nom', 'effectif_abs', 'effectif_pc',
-                    'marie_nb', 'marie_q1', 'marie_q2', 'marie_q3', 'marie_q3q1',
-                    'celib_nb', 'celib_q1', 'celib_q2', 'celib_q3', 'celib_q3q1') 
-revenus %<>% select(-effectif_abs, -effectif_pc, -marie_q3q1, -celib_q3q1)
-
-# make it long
-longify <- function(df, groupName = "marie") {
-  dfsub <- df %>% 
-    select(nom, starts_with(groupName))
-  colnames(dfsub) <- c('nom', 'n', 'q1', 'q2', 'q3')
-  
-  dfsub %<>% 
-    gather("quantile", "revenu", -nom, -n) %>% 
-    mutate(contrib = groupName)
-  dfsub
-}
-
-rvn <- bind_rows(longify(revenus, "marie"), longify(revenus, "celib"))
-
-## GE ville
-rville <- readxl::read_excel(revenues_ville, range = "A20:Q39", col_names = F) %>% 
-  select(-X__4, -X__6, -X__10, -X__11, -X__13, -X__17)
-names(rville) <- c('nom', 'effectif_abs', 'effectif_pc',
-                    'marie_nb', 'marie_q1', 'marie_q2', 'marie_q3',
-                    'celib_nb', 'celib_q1', 'celib_q2', 'celib_q3')
-
-rville %<>% select(-effectif_abs, -effectif_pc) %>% 
-  filter(!nom %in% c('Genève-Cité', 'Plainpalais', 'Eaux-Vives', 'Petit-Saconnex')) %>% 
-  mutate(nom = str_replace(nom, "Cité\\-Centre", "Cité \\- Centre")) %>% 
-  mutate(nom = str_replace(nom, "^La ", "")) %>%   
-  mutate(nom = str_replace(nom, "St\\-Jean \\- Aïre", "St-Jean - Aire"))
+```{r load revenus and the map}
+revenus <- readxl::read_excel(
+  revenus_xls, sheet = "2014", range = "A14:G489", col_names = F) %>% 
+  select(-X__3, -X__4, -X__5, -X__7) %>% 
+  mutate(X__6 = as.numeric(X__6))
+colnames(revenus) <- c('commune', 'soussecteur', 'revenu')
 
 
-rvr <- bind_rows(longify(rville, "marie"), longify(rville, "celib"))
-```
+shp.path <- shp_path(dirGeo = "CH/ge")
+geo.ge <- st_read(shp.path, layer = "GEO_GIREC") %>% 
+  mutate(nom = gsub(" \\- ", "-", NOM))
+match(revenus$soussecteur, geo.ge$NOM)
+idx <- match(revenus$soussecteur, geo.ge$nom)
+idx %>% is.na() %>% sum()
+revenus$soussecteur[is.na(idx)]
 
-```{r load revenus 2011-2014}
-rville2 <- readxl::read_excel(revenues_ville, sheet = "2011", 
-                             range = "A20:Q39", col_names = F) %>% 
-  select(-X__2, -X__5, -X__7, -X__11, -X__12, -X__14)
-names(rville2) <- c('nom', 'effectif_abs', 'effectif_pc',
-                    'marie_nb', 'marie_q1', 'marie_q2', 'marie_q3',
-                    'celib_nb', 'celib_q1', 'celib_q2', 'celib_q3')
+# hack rename: Les Crêts-de-Champel?!
+revenus[which(revenus$soussecteur == "La Petite-Boisière"), 'soussecteur'] <- "La Petite-Boissière"
+revenus[which(revenus$soussecteur == "Communaux-d'Ambily"), 'soussecteur'] <- "Communaux-d'Ambilly"
+revenus[which(revenus$soussecteur == "Les Crêts-de-Champel"), 'soussecteur'] <- "Les Crêts-de-Champel 1"
+revenus[which(revenus$soussecteur == "Crêts-de-Champel"), 'soussecteur'] <- 
+  "Les Crêts-de-Champel 2"
 
-rville2 %<>% select(-effectif_abs, -effectif_pc) %>% 
-  filter(!nom %in% c('Genève-Cité', 'Plainpalais', 'Eaux-Vives', 'Petit-Saconnex')) %>% 
-  mutate(nom = str_replace(nom, "Cité\\-Centre", "Cité \\- Centre")) %>% 
-  mutate(nom = str_replace(nom, "^La ", "")) %>%   
-  mutate(nom = str_replace(nom, "St\\-Jean \\- Aïre", "St-Jean - Aire"))
+geo.ge %<>% 
+  mutate(nom.m = tolower(nom))
 
+revenus %<>% 
+  mutate(nom.m = tolower(soussecteur))
 
-rv.ville <- bind_rows(
-  longify(rville, "marie") %>% mutate(annee = 2014),
-  longify(rville2, "marie") %>% mutate(annee = 2011)  
-  )
+idx <- match(tolower(geo.ge$nom.m), tolower(revenus$nom.m))
+stopifnot(idx %>% is.na() %>% sum() == 0)
 
-rv.ville %>% filter(quantile == "q2") %>% 
-  ggplot(aes(x = annee, y = revenu, group = nom)) +
-  geom_line() +
-  theme_tam()
-
-rv.ville %>% arrange(annee) %>% 
-  group_by (nom, quantile) %>% 
-  summarise(diff = ((revenu[2] - revenu[1]) / revenu[1]) * 100) %>% 
-  ungroup() %>% 
-  arrange(diff)
-
-
-rv.q3q1 <- rv.ville %>% filter(quantile %in% c("q1", "q3")) %>% 
-  arrange(quantile) %>% 
-  group_by(nom, annee) %>% 
-  summarise(q3q1 = revenu[2] / revenu[1]) %>% 
-  ungroup() %>% 
-  arrange(desc(q3q1))
-
-
-rv.q3q1 %>% 
-  ggplot(aes(x = annee, y = q3q1, group = nom, colour = nom)) +
-  geom_line() +
-  theme_tam()
-
-rv.q3q1 %>% spread(annee, q3q1) %>% 
-  mutate(diff = `2014` - `2011`) %>% 
-  arrange(desc(diff))
-
-```
-
-```{r EDA}
-gp <- rvn %>% 
-  ggplot() +
-  geom_point(aes(x = fct_reorder(nom, revenu), y = revenu, group = quantile, colour = quantile)) +
-  facet_grid(~ contrib) +
-  ggtitle("Revenus des couples mariés montrent la plus large disparité") +
-  theme_ipsum_tw() +
-  scale_color_ipsum() +
-  theme(
-    axis.text.x = element_text(angle = 90, hjust = 0),
-    legend.position = "top"
-    )
-gp
-gp %+% rvr
-  
-gp2 <- revenus %>% 
-  mutate(propMarie = marie_nb / (celib_nb + marie_nb)) %>% 
-  select(nom, propMarie, marie_q2) %>% 
-  ggplot() +
-    geom_point(
-      aes(x = fct_reorder(nom, propMarie), 
-          y = propMarie, group = nom, size = marie_q2)) + 
-  theme_ipsum_tw() +
-  theme(
-    axis.text.x = element_text(angle = 90, hjust = 0)
-  )
-gp2
-
-rville %>% 
-  mutate(propMarie = marie_nb / (celib_nb + marie_nb)) %>% 
-  select(nom, propMarie, marie_q2) %>% 
-  ggplot() +
-    geom_point(
-      aes(x = fct_reorder(nom, propMarie), 
-          y = propMarie, group = nom, size = marie_q2)) + 
-  theme_ipsum_tw() +
-  theme(
-    axis.text.x = element_text(angle = 90, hjust = 0)
-  )
-
-
-
-```
-
-```{r load maps, eval = T}
-shp_ch_paths_2018 <- shp_path(2018)
-shp_quartiers <- shp_path(dirGeo = "CH/quartiers")
-
-x <- shp_ch_paths_2018['municipalities']
-layerName <- st_layers(x)
-muni <- st_read(x, layer = layerName$name, 
-          options = "ENCODING=latin1", stringsAsFactors = F) %>% 
-  select(ends_with("NR"), ends_with("NAME")) %>% 
-  filter(KTNR == 25) %>% 
-  select(-KTNR) %>% 
-  # remove the GE in the commune name
-  mutate(GMDNAME = str_replace(GMDNAME, " \\(GE\\)$", "")) %>% 
-  # remove Le in  "Le Grand-Saconnex" 
-  mutate(GMDNAME = str_replace(GMDNAME, "^Le ", "")) %>% 
-  rename(nom = GMDNAME)
-
-stopifnot(all(!is.na(match(unique(rvn$nom), unique(muni$nom)))))
-
-
-layerName <- st_layers(shp_quartiers)
-quart <- st_read(shp_quartiers, layer = "quart17", 
-          options = "ENCODING=latin1", stringsAsFactors = F) %>% 
-  filter(GMDE == 6621) %>% 
-  select(NR, NAME, GMDE) %>% 
-  rename(nom = NAME)
-
-stopifnot(all(!is.na(match(unique(rville$nom), unique(quart$nom)))))
+revenus.geo <- left_join(geo.ge, revenus) %>% 
+  select(-nom.m, -soussecteur)
 
 if(downloadWaterGE) {
   library(esri2sf)
@@ -209,10 +79,20 @@ if(downloadWaterGE) {
 } else {
   water <- st_read("data/waterGE.shp", layer = "waterGE")
 }
-
 ```
 
+
 ```{r prod viz map}
+revenus.geo %>% ggplot() +
+   geom_sf(aes(fill = revenu), lwd = 0.05) +
+  geom_sf(
+    data = water, alpha = 1, lwd = 0.5, fill = "white", stroke = "white"
+  )
+  
+
+
+
+
 dat <- left_join(muni, rvn)
 inlet_geo <- shiftScale_geo(geo = quart, scaleF = 3, shiftM = c(-11000, 16000))
 datv <- left_join(inlet_geo, rvr)

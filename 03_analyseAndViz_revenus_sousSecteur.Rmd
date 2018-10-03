@@ -14,6 +14,8 @@ output:
     theme: simplex
 ---
 
+https://rstudio.github.io/leaflet/choropleths.html
+
 ```{r setup, include=FALSE}
 revenus_xls <- "data/T_20_02_3_23.xls"
 cleanOutput <- F
@@ -38,8 +40,10 @@ library(classInt)
 ```{r load revenus and the map}
 revenus <- readxl::read_excel(
   revenus_xls, sheet = "2014", range = "A14:G489", col_names = F) %>% 
-  select(-X__3, -X__4, -X__5, -X__7) %>% 
-  mutate(X__6 = as.numeric(X__6))
+  select(-X__3, -X__4, -X__5, -X__7) 
+
+revenus %<>%  
+  mutate(X__6 = as.numeric(ifelse(X__6 == '-', 0, X__6 )))
 colnames(revenus) <- c('commune', 'soussecteur', 'revenu')
 
 
@@ -82,97 +86,33 @@ if(downloadWaterGE) {
 ```
 
 
-```{r prod viz map}
-revenus.geo %>% ggplot() +
-   geom_sf(aes(fill = revenu), lwd = 0.05) +
-  geom_sf(
-    data = water, alpha = 1, lwd = 0.5, fill = "white", stroke = "white"
-  )
-  
-
-
-
-
-dat <- left_join(muni, rvn)
-inlet_geo <- shiftScale_geo(geo = quart, scaleF = 3, shiftM = c(-11000, 16000))
-datv <- left_join(inlet_geo, rvr)
-
-# Create circles sf to encompass the inlet map and its original location
-geo_subset_coord <- encircle_coord(quart)
-inlet_coord <- encircle_coord(inlet_geo)
-cone_sfc <- cone_geo(geo_subset_coord, inlet_coord)
-circle_zoom_sfc <- encircle_geo(geo_subset_coord)
-circle_inlet_sfc <- encircle_geo(inlet_coord)
-
-labels <- bind_rows(
-muni %>% st_centroid() %>% 
-  st_coordinates() %>% as_tibble() %>% 
-  mutate(nom = muni$nom),  
-inlet_geo %>% st_centroid() %>% 
-  st_coordinates() %>% as_tibble()  %>% 
-  mutate(nom = inlet_geo$nom) 
-)
-
+```{r test viz map, eval = F}
 watercol <- "#958da6"
 labelcol <- "#f6d5de"
 bordercol <- '#c4c6d4'
 baseFont <-  "Titillium Web"
-# create revenu breaks
 
-brks <- seq(80000, 260000, 20000)
-brks_labels <- c("<100\nmille CHF", "100-120", "120-140", 
-"140-160", "160-180", "180-200", "200-220",
-"220-240", "240+\nmille CHF")
+sansContribuable.geo <- revenus.geo %>% 
+  filter(revenu == 0)
+revenus.geo <- revenus.geo %>% 
+  filter(revenu != 0)
+revenusNA.geo <- revenus.geo %>% 
+  filter(is.na(revenu))
 
-q2datv <- datv %>% 
-  filter(contrib == 'marie') %>% 
-  spread(quantile, revenu) %>%
-  mutate(
-    catrev = cut(q2, brks, labels = brks_labels),
-    tp = str_c('<div class = "tp"><h4>', nom, '</h4>', 
-               "revenu médian des couples mariés: <b>", 
-               format(q2, big.mark = " "), " </b>CHF<br>",
-               "effectif: ", n)
-    )
 
-q2datc <-  dat %>%  filter(contrib == 'marie') %>% 
-  spread(quantile, revenu) %>%
-  mutate(
-    catrev = cut(q2, brks, labels = brks_labels),
-    tp = str_c('<div class = "tp"><h4>', nom, '</h4>', 
-               "revenu médian des couples mariés: <b>", 
-               format(q2, big.mark = " "), " </b>CHF<br>",
-               "effectif: ", n)
-    )
+rev.range <- range(revenus.geo$revenu, na.rm = T)
+brks <- pretty(revenus.geo$revenu / 1000, n = 10)
+brks_labels <- formatBreaks(brks, suffix_first = " mille CHF", suffix_last=  " mille CHF")
 
-inlet_sfc_bbox <- circle_inlet_sfc %>% st_bbox()
-inlet_label <- tibble(
-  x = inlet_coord$centre %>% st_coordinates() %>% as.tibble() %>% .$X,
-  y = inlet_sfc_bbox$ymax -770,
-  label = "Ville de Genève"
-)
+revenus.geo %<>% mutate(
+    revcat = cut(revenu/1000, brks, labels = brks_labels))
+    
 
-q2map <- ggplot() +
-  geom_sf(data = cone_sfc, fill = "#dcb7dc", lwd = NA, alpha = 0.15) +  
-  geom_sf(data = circle_inlet_sfc, fill = "#dcb7dc", lwd = NA, alpha = 0.15) +
-  geom_sf_interactive(data = q2datc, 
-          aes(fill = catrev, data_id = GMDNR, tooltip = tp), lwd = 0.05, colour = bordercol) +
-  geom_sf(data = muni %>% filter(GMDNR == 6621), 
-          fill = NA, lwd = 0.7, colour = "#ffdaff") +
-  geom_sf_interactive(data = q2datv, 
-          aes(fill = catrev, data_id = NR, tooltip = tp), lwd = 0.06, colour = bordercol)  +
+revenus.geo %>% ggplot() +
+   geom_sf(aes(fill = revcat), lwd = 0.05) +
   geom_sf(
-    data = water, lwd = 0.9, fill = watercol, alpha = 1, colour = watercol
-  ) +
-  geom_text(data = inlet_label, aes(x = x, y = y, label = label), hjust = 0.5, vjust = 1,
-            family = baseFont, size = 2.5, alpha = 1, fontface = "bold", colour = "#404040") #+
-  # geom_text(data = labels,
-  #           aes(x = X, y = Y, label = nom), family = baseFont,
-  #           size = 1.1, alpha = 1, check_overlap = T, colour = labelcol )
-
-
-
-q2map <- q2map + 
+    data = water, alpha = 1, lwd = 0.5, fill = "white", colour = "white"
+  ) + 
   theme_map(base_family = baseFont) +
   theme(legend.position = 'top', 
         legend.key = element_blank(),
@@ -183,90 +123,67 @@ q2map <- q2map +
     nrow = 1, direction = 'horizontal', label.hjust = 0, label.position = 'bottom', 
     keywidth = 2, keyheight = 0.5, title = ""))  +
   coord_sf(datum = NA, expand = F)
+```  
 
+
+```{r leaflet production map}
+library("leaflet")
+
+###4326 or 
+#def.crs <- "+proj=longlat +datum=WGS84 +no_defs"
+# reproject data and remove the water bodies
+revenus.geo %<>% 
+  st_set_crs(2056) %>% 
+  st_transform(crs = 4326)
   
-imap <- ggiraph(
-  code = print(q2map), 
-  width = 1,
-  height_svg = 5,
-  tooltip_offx = -50,
-  width_svg = 4.5,
-  tooltip_extra_css = "background-color:#d9d9d9;padding:0px;margin:0px;border-radius:4px;"
-)
+# water %<>%
+#   st_set_crs(2056) %>%
+#   st_transform(crs = 4326)
+# revenus.geo <- st_difference(revenus.geo, lwgeom::st_make_valid(water))
+
+sansContribuable.geo <- revenus.geo %>% 
+  filter(revenu == 0)
+revenus.geo <- revenus.geo %>% 
+  filter(revenu != 0)
+revenusNA.geo <- revenus.geo %>% 
+  filter(is.na(revenu))
+
+rev.range <- range(revenus.geo$revenu, na.rm = T)
+brks <- pretty(revenus.geo$revenu / 1000, n = 10)
+brks_labels <- formatBreaks(brks, suffix_first = " mille CHF", suffix_last=  " mille CHF")
+
+revenus.geo %<>% mutate(
+    revcat = cut(revenu/1000, brks, labels = brks_labels))
+
+pal <- colorBin('RdBu', domain = revenus.geo$revenu, bins = brks)
 
 
+leaflet(options = leafletOptions(
+  minZoom = 10
+)) %>%
+  addProviderTiles(providers$CartoDB.PositronNoLabels,
+                   options = providerTileOptions(opacity = 0.35)) %>% 
+  addPolygons(data = revenus.geo, 
+              color = "black", weight = 0.2, smoothFactor = 0.5,
+              opacity = 0.2, fillOpacity = 0.75,
+              fillColor = ~pal(revenu / 1000),
+              highlightOptions = highlightOptions(
+                color = "white", weight = 2,
+                bringToFront = TRUE),
+                label = revenus.geo$nom,
+              labelOptions = labelOptions(
+                style = list("font-weight" = "normal", padding = "3px 8px"),
+                textsize = "15px",
+                direction = "auto")
+              ) %>% 
+  addMapPane("labels", zIndex = 410) %>% # shown labels above      
+  addProviderTiles(providers$CartoDB.PositronOnlyLabels,
+                   options = providerTileOptions(pane = "labels") ) %>%  addEasyButton(easyButton(
+    icon="fa-crosshairs", title="Locate Me",
+    onClick=JS("function(btn, map){ map.locate({setView: true}); }")))
 
-footer <- str_c("source: ", "Administration fiscale cantonale & Office cantonal de la statistique ", 
-                " | code:&nbsp;", htmlLink("https://github.com/davidgohel/ggiraph", "ggiraph"), 
-                " |&nbsp;Tribune&nbsp;de&nbsp;Genève&nbsp;| ",
-                htmlLink("https://twitter.com/duc_qn", "@duc_qn"))
-    
-save_html(
-  tags$html(
-    tags$head(includeHTML("stylesMap.html"), HTML(dimensionWatcher)),
-    tags$body(    
-      h2("Le centre de Genève, le plus populo. Mais des larges différences entre les quartiers de la ville"),
-      div(class = "descr", HTML(
-        str_c("INTERACTIF - Revenu annuel brut médian* des contribuables mariés par commune ou par quartier en 2014",
-              '&nbsp;<img src="https://www.tdg.ch/extern/interactive_wch/tdg/assets/hand_interactive.png" width="20" align="top">',
-" Au niveau cantonal, la médiane s'élève à 127'686 CHF"
-              ))),
 
-      div(class="container", 
-          div(class = "h3in", HTML("Quels sont les quartiers huppés ou populaires?")),
-          imap
-      ),
-      div(id = "footer", HTML("<em>*La médiane correspond ici au revenu divisant les contribuables mariés en deux groupes de taille égale. Une moitié a rapporté un revenu bruit moindre, l'autre moitié un revenu supérieur.</em>")),
-      div(id = "cite", HTML(footer))
-    )), file = "carte_revenuMedian.html", libdir = "js"
-)
-    
-    
 ```
-
-```{r viz map}
-ggplot() +
-  geom_sf(data = dat %>% filter(quantile == "q2", contrib == "marie"), 
-    aes(fill = revenu), lwd = 0) +
-  theme_map() +
-  facet_grid(~quantile) + 
-  scale_fill_viridis_c()  +
-  coord_sf(datum = NA, expand = F) +
-  ggtitle("a keeper!, Genève ville populaire")
-
-dat %>% 
-  arrange(quantile) %>% 
-  filter(contrib == "marie") %>% 
-  group_by(nom) %>% summarise(q3q1 = revenu[3] / revenu[1]) %>% 
-  ungroup() %>% 
-  ggplot() +
-  geom_sf(aes(fill = q3q1), lwd = 0) +
-  theme_map() +
-  scale_fill_viridis_c()  +
-  coord_sf(datum = NA, expand = F) +
-  ggtitle("q3 / q1, rien à signaler")
-  
-
-ggplot() +
-  geom_sf(data = dat %>% filter(contrib == "marie", quantile != "q1"), 
-    aes(fill = revenu), lwd = 0) +
-  theme_map() +
-  facet_grid(~quantile) + 
-  scale_fill_viridis_c()  +
-  coord_sf(datum = NA, expand = F)
-
-
-muniShareM <- left_join(muni, revenus %>% 
-  mutate(propMarie = marie_nb / (celib_nb + marie_nb)) %>% 
-  select(nom, propMarie))
-         
-inlet_geo <- shiftScale_geo(geo = quart, scaleF = 3, shiftM = c(-11000, 16000))
-villeShareM <- left_join(inlet_geo, rville %>% 
-  mutate(propMarie = marie_nb / (celib_nb + marie_nb)) %>% 
-  select(nom, propMarie))
-         
-```
-
 
 
 ```{r move production graphics}

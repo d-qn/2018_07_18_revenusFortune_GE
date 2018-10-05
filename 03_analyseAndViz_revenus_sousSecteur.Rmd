@@ -34,17 +34,19 @@ library(hrbrthemes)
 ### Interactive 
 library(ggiraph)
 library(htmltools)
-library(classInt)
+library(RColorBrewer)
+library("leaflet")
+library(viridis)
 ```
 
 ```{r load revenus and the map}
 revenus <- readxl::read_excel(
   revenus_xls, sheet = "2014", range = "A14:G489", col_names = F) %>% 
-  select(-X__3, -X__4, -X__5, -X__7) 
+  select(-X__4, -X__5, -X__7) 
 
 revenus %<>%  
   mutate(X__6 = as.numeric(ifelse(X__6 == '-', 0, X__6 )))
-colnames(revenus) <- c('commune', 'soussecteur', 'revenu')
+colnames(revenus) <- c('commune', 'soussecteur', 'effectif', 'revenu')
 
 
 shp.path <- shp_path(dirGeo = "CH/ge")
@@ -81,8 +83,14 @@ if(downloadWaterGE) {
   water <- st_transform(water, st_crs(muni))
   water %>% st_write(dsn = "data/", driver = "ESRI Shapefile", layer = "waterGE.shp")  
 } else {
-  water <- st_read("data/waterGE.shp", layer = "waterGE")
+  water <- st_read("data/waterGE.shp", layer = "waterGE") %>% 
+  st_set_crs(2056) %>% 
+  st_transform(crs = 4326)
 }
+
+communes <- st_read("data/GEO_COMMUNES_GE_SIMPLIFIEES.shp") %>% 
+  st_set_crs(2056) %>% 
+  st_transform(crs = 4326)
 ```
 
 
@@ -92,12 +100,8 @@ labelcol <- "#f6d5de"
 bordercol <- '#c4c6d4'
 baseFont <-  "Titillium Web"
 
-sansContribuable.geo <- revenus.geo %>% 
-  filter(revenu == 0)
-revenus.geo <- revenus.geo %>% 
-  filter(revenu != 0)
-revenusNA.geo <- revenus.geo %>% 
-  filter(is.na(revenu))
+revenus.geo %<>% 
+  mutate(revenu = ifelse(revenu == 0, NA, revenu))
 
 
 rev.range <- range(revenus.geo$revenu, na.rm = T)
@@ -127,60 +131,111 @@ revenus.geo %>% ggplot() +
 
 
 ```{r leaflet production map}
-library("leaflet")
+# remove water
+ # communes %<>%
+ #    st_difference(st_union(st_combine(lwgeom::st_make_valid(water))))
 
-###4326 or 
+ ###4326 or 
 #def.crs <- "+proj=longlat +datum=WGS84 +no_defs"
 # reproject data and remove the water bodies
 revenus.geo %<>% 
   st_set_crs(2056) %>% 
   st_transform(crs = 4326)
-  
-# water %<>%
-#   st_set_crs(2056) %>%
-#   st_transform(crs = 4326)
-# revenus.geo <- st_difference(revenus.geo, lwgeom::st_make_valid(water))
+# revenus.geo %<>% 
+#   st_difference(st_union(st_combine(lwgeom::st_make_valid(water))))
 
-sansContribuable.geo <- revenus.geo %>% 
-  filter(revenu == 0)
-revenus.geo <- revenus.geo %>% 
-  filter(revenu != 0)
-revenusNA.geo <- revenus.geo %>% 
-  filter(is.na(revenu))
+revenus.geo %<>% 
+  mutate(revenu = ifelse(revenu == 0, NA, revenu))
 
-rev.range <- range(revenus.geo$revenu, na.rm = T)
+muni.ge.tmp <- communes %>% select(COMMUNE, NO_COM_FED)
+st_geometry(muni.ge.tmp) <- NULL
+
+revenus.geo <- left_join(revenus.geo, muni.ge.tmp)
+
+## Breaks for revenus and palette
+#rev.range <- range(revenus.geo$revenu, na.rm = T)
 brks <- pretty(revenus.geo$revenu / 1000, n = 10)
 brks_labels <- formatBreaks(brks, suffix_first = " mille CHF", suffix_last=  " mille CHF")
-
 revenus.geo %<>% mutate(
-    revcat = cut(revenu/1000, brks, labels = brks_labels))
+    revcat = cut(revenu /1000, brks, labels = brks_labels))
+pal <- colorBin(viridis_pal(option = "D")(length(brks_labels)),
+                domain = revenus.geo$revenu, bins = brks, na.color = "#bdc2c2")
+# pal <- colorBin("PuBu",
+#                 domain = revenus.geo$revenu, bins = brks, na.color = "#DADCDD")
 
-pal <- colorBin('RdBu', domain = revenus.geo$revenu, bins = brks)
+## tooltip
+revenus.geo %<>% 
+  mutate(
+    tp = str_c(
+      "<h4>", nom, "</h4>",
+      "<h5>", COMMUNE, "</h5>",
+      ifelse(is.na(revenu), 
+             'indisponible', 
+             str_c("<b>", format(revenu, big.mark = "'") , ".-</b>")
+      )
+    ) %>% lapply(htmltools::HTML)
+  )
 
-
-leaflet(options = leafletOptions(
-  minZoom = 10
-)) %>%
+map <- leaflet(
+  revenus.geo, 
+  height = 700,
+  options = leafletOptions(minZoom = 12)
+) %>%
+  setView(6.14726,46.20530,  zoom = 13) %>%
+  #setMaxBounds(lng1 = 6.0782, lat1 = 46.20530, lng2 = 46.2902, lat2 = 6.1866) %>%
   addProviderTiles(providers$CartoDB.PositronNoLabels,
-                   options = providerTileOptions(opacity = 0.35)) %>% 
-  addPolygons(data = revenus.geo, 
-              color = "black", weight = 0.2, smoothFactor = 0.5,
-              opacity = 0.2, fillOpacity = 0.75,
+                   options = providerTileOptions(opacity = 0.35)) %>%
+  addPolygons( 
+              color = "white", weight = 0.2, smoothFactor = 0.5,
+              opacity = 0.9, fillOpacity = 0.7,
               fillColor = ~pal(revenu / 1000),
               highlightOptions = highlightOptions(
-                color = "white", weight = 2,
-                bringToFront = TRUE),
-                label = revenus.geo$nom,
+                color = "black", weight = 5,
+                bringToFront = TRUE, fillOpacity = 1),
+                label = revenus.geo$tp,
               labelOptions = labelOptions(
+                offset = c(20, 0),
                 style = list("font-weight" = "normal", padding = "3px 8px"),
                 textsize = "15px",
                 direction = "auto")
               ) %>% 
+  addPolylines(data = communes,
+              color = "black", weight = 0.7, smoothFactor = 0.2,
+              opacity = 0.4
+              ) %>%
+  addPolylines(data = st_union(communes),
+              color = "black", weight = 1.5, smoothFactor = 0,
+              opacity = 0.7
+              ) %>%
   addMapPane("labels", zIndex = 410) %>% # shown labels above      
   addProviderTiles(providers$CartoDB.PositronOnlyLabels,
-                   options = providerTileOptions(pane = "labels") ) %>%  addEasyButton(easyButton(
+                   options = providerTileOptions(pane = "labels") ) %>%
+  addLegend(
+    pal = pal, values = ~revenu, opacity = 0.7, bins = 2,
+    position = "topright", na.label = "indisponible", title = "Revenus en millier CHF") %>% 
+  addEasyButton(easyButton(
     icon="fa-crosshairs", title="Locate Me",
     onClick=JS("function(btn, map){ map.locate({setView: true}); }")))
+
+
+
+save_html(
+  tags$html(
+    tags$head(HTML(dimensionWatcher), includeCSS("BMP_dev.css")),
+    tags$body(    
+      #h2(""),
+      div(class = "descr", HTML(
+        str_c("INTERACTIF - Revenu annuel brut médian* des contribuables mariés par commune ou par quartier en 2014",
+              '&nbsp;<img src="https://www.tdg.ch/extern/interactive_wch/tdg/assets/hand_interactive.png" width="20" align="top">',
+" Au niveau cantonal, la médiane s'élève à 127'686 CHF"
+              ))),
+      div(class="container", 
+          map
+      )#,
+      # div(id = "footer", HTML("<em>*La médiane correspond ici au revenu divisant les contribuables mariés en deux groupes de taille égale. Une moitié a rapporté un revenu bruit moindre, l'autre moitié un revenu supérieur.</em>")),
+    #  div(id = "cite", HTML(footer))
+    )), file = "carte_revenuSousSecteurs.html", libdir = "js"
+)
 
 
 ```

@@ -1,32 +1,36 @@
-<link href="https://fonts.googleapis.com/css?family=Playfair+Display:700|Titillium+Web:200,300,400,700" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css?family=Roboto+Condensed:300,700|Roboto:500,700" rel="stylesheet">
+
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<script src="https://files.newsnetz.ch/scripts/dimension_watcher.js"></script>
+<script>
+DimensionWatcher.enableParentNotification(
+    function() {
+      return "100%"
+    },
+    function() {
+      return document.body.scrollHeight
+    }
+  );
+</script>
+
 <style>
 
 body {
   text-rendering: optimizeLegibility;
   max-width:100%;
-  margin:2px 15px 2px 5px;
+  margin:4px 22px 2px 5px;
 }
 
-body, h1, h2, h3, h5, h6m .descr, td, table {
-    font-family: 'Titillium Web', sans-serif;
-}
-
-h3, .h3in, h4 {
-    font-family: 'Playfair Display', sans-serif;
+body, h1, h2, h3, .h3in, h4, h5, h6m .descr, td, table {
+    font-family: 'Roboto Condensed', sans-serif;
 }
 
 .container {
-    margin-top: -6vh; /*   !!!!!!!!!!!!!!!!!!!   manual hack  to reduce margin!!!!*/
+    margin-top: -5vh; /*   !!!!!!!!!!!!!!!!!!!   manual hack  to reduce margin!!!!*/
 }
-/*
-svg {
-    position: absolute;
-    top: 0;
-    left: 0;
-}
-*/
 
 #cite {
   font-weight: 200;
@@ -35,6 +39,7 @@ svg {
   text-align:right;
   margin-right:5px;
   padding-bottom: 9px;
+  line-height: 140%;
 }
 #cite a {
 	text-decoration: none;
@@ -43,11 +48,11 @@ svg {
 
 #footer {
   font-weight: 300;
-  background-color: #f2f2f3;
-  font-size: 0.75em;
+  font-size: 0.8em;
   color: #595959;
   padding: 6px;
   margin-bottom:8px;
+  line-height: 140%;
 }
 
 .tp{
@@ -65,6 +70,7 @@ svg {
 }
 
 .descr {
+ line-height: 125%;
  font-size: 1.1em;
  font-weight: lighter;
  color: #1d1f30;
@@ -90,12 +96,13 @@ h3 {
 }
 
 .h3in {
+   z-index: 420;
    position: relative;
    text-align: center;
-   font-size: 1.15em;
+   font-size: 1.2em;
    color: #1a1a1a;
    font-weight: 700;
-   top: 30vw;
+   top: 20vw;
    padding: 5px;
    margin-right: 20px;
    margin-left: 62%;
@@ -127,6 +134,60 @@ a, a:visited {
     body {
            font-size: 12px;
     }
+}
+
+/* -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  -  
+CSS copied from https://interaktiv.morgenpost.de/fahrraddiebstaehle-berlin/ to make legend colours outside map
+ */
+
+.legend {
+    padding: 0 10px;
+    max-width: 500px;
+    margin: -10px auto 0;
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-pack: center;
+    -webkit-justify-content: center;
+    -ms-flex-pack: center;
+    justify-content: center;
+    -webkit-box-align: center;
+    -webkit-align-items: center;
+    -ms-flex-align: center;
+    align-items: center;
+    font-size: 1.4rem;
+}
+
+.legend__items {
+    display: -webkit-box;
+    display: -webkit-flex;
+    display: -ms-flexbox;
+    display: flex;
+    -webkit-box-flex: 1;
+    -webkit-flex-grow: 1;
+    -ms-flex-positive: 1;
+    flex-grow: 1;
+    margin: 0 .5em
+}
+
+.legend__item {
+    -webkit-box-flex: 1;
+    -webkit-flex-grow: 1;
+    -ms-flex-positive: 1;
+    flex-grow: 1;
+    height: .8em
+}
+
+.legend__label {
+    font-size: 0.6em;
+    font-weight: 300;
+    color: #262626;
+}
+
+.legend__icon {
+    font-size: 1em;
+    margin-right: .7em
 }
 
 </style>

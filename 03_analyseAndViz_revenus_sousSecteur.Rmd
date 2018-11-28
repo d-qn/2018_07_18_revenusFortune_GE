@@ -131,18 +131,9 @@ revenus.geo %>% ggplot() +
 
 
 ```{r leaflet production map}
-# remove water
- # communes %<>%
- #    st_difference(st_union(st_combine(lwgeom::st_make_valid(water))))
-
- ###4326 or 
-#def.crs <- "+proj=longlat +datum=WGS84 +no_defs"
-# reproject data and remove the water bodies
 revenus.geo %<>% 
   st_set_crs(2056) %>% 
   st_transform(crs = 4326)
-# revenus.geo %<>% 
-#   st_difference(st_union(st_combine(lwgeom::st_make_valid(water))))
 
 revenus.geo %<>% 
   mutate(revenu = ifelse(revenu == 0, NA, revenu))
@@ -158,20 +149,21 @@ brks <- pretty(revenus.geo$revenu / 1000, n = 10)
 brks_labels <- formatBreaks(brks, suffix_first = " mille CHF", suffix_last=  " mille CHF")
 revenus.geo %<>% mutate(
     revcat = cut(revenu /1000, brks, labels = brks_labels))
-pal <- colorBin(viridis_pal(option = "D")(length(brks_labels)),
+# pal <- colorBin(viridis_pal(option = "A")(length(brks_labels)),
+#                 domain = revenus.geo$revenu, bins = brks, na.color = "#bdc2c2")
+pal <- colorBin("PuBu",
                 domain = revenus.geo$revenu, bins = brks, na.color = "#bdc2c2")
-# pal <- colorBin("PuBu",
-#                 domain = revenus.geo$revenu, bins = brks, na.color = "#DADCDD")
 
 ## tooltip
 revenus.geo %<>% 
   mutate(
     tp = str_c(
+      '<div class="tp">',
       "<h4>", nom, "</h4>",
       "<h5>", COMMUNE, "</h5>",
       ifelse(is.na(revenu), 
              'indisponible', 
-             str_c("<b>", format(revenu, big.mark = "'") , ".-</b>")
+             str_c("<b>", format(revenu, big.mark = "'") , ".-</b></div>")
       )
     ) %>% lapply(htmltools::HTML)
   )
@@ -184,27 +176,29 @@ map <- leaflet(
   setView(6.14726,46.20530,  zoom = 13) %>%
   #setMaxBounds(lng1 = 6.0782, lat1 = 46.20530, lng2 = 46.2902, lat2 = 6.1866) %>%
   addProviderTiles(providers$CartoDB.PositronNoLabels,
-                   options = providerTileOptions(opacity = 0.35)) %>%
+                   options = providerTileOptions(opacity = 1)) %>%
   addPolygons( 
-              color = "white", weight = 0.2, smoothFactor = 0.5,
-              opacity = 0.9, fillOpacity = 0.7,
+              color = "white", weight = 0.1, smoothFactor = 0.5,
+              opacity = 0.95, fillOpacity = 0.98,
               fillColor = ~pal(revenu / 1000),
               highlightOptions = highlightOptions(
-                color = "black", weight = 5,
+                color = tam_pal[2], weight = 3,
                 bringToFront = TRUE, fillOpacity = 1),
                 label = revenus.geo$tp,
               labelOptions = labelOptions(
                 offset = c(20, 0),
-                style = list("font-weight" = "normal", padding = "3px 8px"),
-                textsize = "15px",
+                style = list("font-weight" = "normal", padding = "3px 5px", "background-color" = "#f2f2f2",
+                "border-radius" = "2px", "padding" = "0px"),
+                textsize = "12px",
+                sticky = F,
                 direction = "auto")
               ) %>% 
   addPolylines(data = communes,
-              color = "black", weight = 0.7, smoothFactor = 0.2,
-              opacity = 0.4
+              color = "white", weight = 1, smoothFactor = 0,
+              opacity = 0.95
               ) %>%
   addPolylines(data = st_union(communes),
-              color = "black", weight = 1.5, smoothFactor = 0,
+              color = "black", weight = 1.5, smoothFactor = 0.3,
               opacity = 0.7
               ) %>%
   addMapPane("labels", zIndex = 410) %>% # shown labels above      
@@ -221,7 +215,7 @@ map <- leaflet(
 
 save_html(
   tags$html(
-    tags$head(HTML(dimensionWatcher), includeCSS("BMP_dev.css")),
+    tags$head(includeHTML("styleRoboto.html")),
     tags$body(    
       #h2(""),
       div(class = "descr", HTML(

@@ -2126,6 +2126,7 @@ a:hover {
     }
 }
 
+/*
 .tooltip-wrapper {
     background: #fff;
     z-index: 600;
@@ -2172,6 +2173,7 @@ a:hover {
 .tooltip-wrapper .close:hover .icon {
     color: #fff
 }
+*/
 
 .tooltip-header {
     padding: 1em 1em .5em

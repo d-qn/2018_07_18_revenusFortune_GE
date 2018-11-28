@@ -236,7 +236,7 @@ inlet_geo %>% st_centroid() %>%
 watercol <- "#958da6"
 labelcol <- "#f6d5de"
 bordercol <- '#c4c6d4'
-baseFont <-  "Titillium Web"
+baseFont <-  "Roboto Condensed"
 # create revenu breaks
 
 brks <- seq(80000, 260000, 20000)
@@ -299,6 +299,7 @@ q2map <- q2map +
         plot.margin = margin(-5, 5, 0, 1.1, "pt")
         ) +
   scale_fill_viridis_d(
+    direction = -1,
     option = "D", guide = guide_legend(
     nrow = 1, direction = 'horizontal', label.hjust = 0, label.position = 'bottom', 
     keywidth = 2, keyheight = 0.5, title = ""))  +
